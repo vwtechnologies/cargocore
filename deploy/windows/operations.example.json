@@ -1,0 +1,22 @@
+{
+  "AppPath": "C:\\CargoCore\\current",
+  "PhpPath": "C:\\xampp\\php\\php.exe",
+  "ApachePath": "C:\\xampp\\apache\\bin\\httpd.exe",
+  "ApacheService": "Apache2.4",
+  "CaddyPath": "C:\\CargoCore\\tools\\caddy.exe",
+  "CaddyService": "CargoCoreGateway",
+  "CaddyConfig": "C:\\CargoCore\\config\\Caddyfile",
+  "PublicIp": "REPLACE_PUBLIC_STATIC_IPV4",
+  "AcmeEmail": "REPLACE_OPERATOR_EMAIL",
+  "LogPath": "C:\\CargoCore\\logs",
+  "Database": "cargocore",
+  "DatabaseDefaults": "C:\\CargoCoreSecrets\\backup.cnf",
+  "MariaDbDump": "C:\\xampp\\mysql\\bin\\mariadb-dump.exe",
+  "MariaDbClient": "C:\\xampp\\mysql\\bin\\mysql.exe",
+  "MigrationEnvironment": "C:\\CargoCoreSecrets\\migration.json",
+  "ResticPath": "C:\\CargoCore\\tools\\restic.exe",
+  "BackupRepository": "\\\\BACKUP-SERVER\\CargoCore",
+  "BackupPasswordFile": "C:\\CargoCoreSecrets\\restic-password.txt",
+  "StagingPath": "C:\\CargoCoreBackupStaging",
+  "ServiceAccount": "SERVER\\CargoCoreService"
+}

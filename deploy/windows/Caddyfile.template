@@ -1,0 +1,35 @@
+{
+    admin 127.0.0.1:2019
+    email {{ACME_EMAIL}}
+    default_sni {{PUBLIC_IP}}
+    log {
+        output file "{{LOG_PATH}}/caddy.log" {
+            roll_size 20MiB
+            roll_keep 10
+        }
+    }
+}
+https://{{PUBLIC_IP}} {
+    tls {
+        issuer acme https://acme-v02.api.letsencrypt.org/directory {
+            profile shortlived
+        }
+    }
+    encode zstd gzip
+    @private path /.env* /.git/* /phpmyadmin* /dashboard/* /xampp/* /storage/* /vendor/* /config/*
+    respond @private 404
+    header {
+        X-Content-Type-Options nosniff
+        Referrer-Policy same-origin
+        X-Frame-Options DENY
+        Permissions-Policy "camera=(), microphone=(), geolocation=()"
+        -Server
+    }
+    reverse_proxy 127.0.0.1:8088
+    log {
+        output file "{{LOG_PATH}}/access.log" {
+            roll_size 20MiB
+            roll_keep 10
+        }
+    }
+}

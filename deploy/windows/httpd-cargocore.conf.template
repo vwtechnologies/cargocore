@@ -1,0 +1,22 @@
+# Include this in a dedicated XAMPP Apache configuration.
+# Replace its existing Listen 80 with Listen 127.0.0.1:8088.
+# Disable httpd-ssl.conf and unrelated XAMPP aliases/modules.
+ServerTokens Prod
+ServerSignature Off
+TraceEnable Off
+Timeout 60
+<VirtualHost 127.0.0.1:8088>
+    ServerName {{PUBLIC_IP}}
+    DocumentRoot "{{APP_PATH}}/public"
+    <Directory "{{APP_PATH}}/public">
+        Options -Indexes -Includes -ExecCGI +FollowSymLinks
+        AllowOverride All
+        Require all granted
+    </Directory>
+    <FilesMatch "^\.">
+        Require all denied
+    </FilesMatch>
+    LimitRequestBody 12582912
+    ErrorLog "{{LOG_PATH}}/apache-error.log"
+    CustomLog "{{LOG_PATH}}/apache-access.log" combined
+</VirtualHost>

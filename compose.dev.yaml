@@ -1,0 +1,28 @@
+services:
+  mariadb:
+    image: mariadb:10.11
+    ports: ['127.0.0.1:3311:3306']
+    environment:
+      MARIADB_RANDOM_ROOT_PASSWORD: '1'
+      MARIADB_DATABASE: cargocore
+      MARIADB_USER: cargocore
+      MARIADB_PASSWORD: cargocore-local-only
+    volumes: ['cargocore-data:/var/lib/mysql']
+    healthcheck:
+      test: ['CMD','healthcheck.sh','--connect','--innodb_initialized']
+      interval: 5s
+      retries: 20
+  mariadb-test:
+    image: mariadb:10.11
+    ports: ['127.0.0.1:3312:3306']
+    environment:
+      MARIADB_RANDOM_ROOT_PASSWORD: '1'
+      MARIADB_DATABASE: cargocore_test
+      MARIADB_USER: cargocore
+      MARIADB_PASSWORD: cargocore-test-only
+    healthcheck:
+      test: ['CMD','healthcheck.sh','--connect','--innodb_initialized']
+      interval: 5s
+      retries: 20
+volumes:
+  cargocore-data:
