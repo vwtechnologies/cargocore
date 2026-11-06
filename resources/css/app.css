@@ -3908,13 +3908,23 @@ html, body {
 }
 
 .subcompany-table-container {
+    min-width: 0;
+    max-width: 100%;
     overflow-x: auto;
+    overscroll-behavior-x: contain;
 }
 
 .subcompany-table {
     width: 100%;
+    min-width: 720px;
     border-collapse: collapse;
     font-size: 13.5px;
+}
+
+.subcompany-table th,
+.subcompany-table th button {
+    overflow-wrap: normal;
+    word-break: normal;
 }
 
 .subcompany-table th {
