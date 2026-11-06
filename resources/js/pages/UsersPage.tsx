@@ -60,7 +60,7 @@ export function UsersPage() {
     const columns: MasterColumn[] = [
         {
             key: "username",
-            label: "USERNAME",
+            label: "Username",
             render: (record) => (
                 <button
                     type="button"
@@ -74,7 +74,7 @@ export function UsersPage() {
                 </button>
             ),
         },
-        { key: "role_name", label: "USER ROLE" },
+        { key: "role_name", label: "User Role" },
     ];
     return (
         <div className="users-workspace">
@@ -108,7 +108,7 @@ export function UsersPage() {
                 onDelete={() => {}}
                 newAriaLabel="New user"
                 newButtonLabel="New user"
-                listHeading="USERS"
+                listHeading="Users"
                 items={query.data?.data ?? []}
                 columns={columns}
                 selectedId={creating ? null : (selected?.id ?? null)}
@@ -147,7 +147,7 @@ export function UsersPage() {
                 ) : query.isPending ? (
                     <Loading />
                 ) : (
-                    <Empty title="Select a user or create an account" />
+                    <Empty title="Select A User Or Create An Account" />
                 )}
             </MasterDetailShell>
         </div>
@@ -370,9 +370,9 @@ function UserForm({
                         <div className="country-fields-grid">
                             {(
                                 [
-                                    ["name", "FULL NAME"],
-                                    ["username", "USERNAME"],
-                                    ["email", "EMAIL ADDRESS"],
+                                    ["name", "Full Name"],
+                                    ["username", "Username"],
+                                    ["email", "Email Address"],
                                 ] as const
                             ).map(([key, label]) => (
                                 <div className="company-field" key={key}>
@@ -412,12 +412,12 @@ function UserForm({
                             ))}
                             <div className="company-field">
                                 <label htmlFor="user-role">
-                                    USER ROLE{" "}
+                                    User Role{" "}
                                     <span className="required-star">*</span>
                                 </label>
                                 <select
                                     id="user-role"
-                                    aria-label="USER ROLE"
+                                    aria-label="User Role"
                                     required
                                     value={values.role_id}
                                     disabled={!editing}
@@ -451,14 +451,14 @@ function UserForm({
                                 {error("role_id")}
                             </div>
                             <div className="company-field">
-                                <label>ACCOUNT STATUS</label>
+                                <label>Account Status</label>
                                 {toggle("Account status", values.status, () =>
                                     update("status", !values.status),
                                 )}
                                 {error("status")}
                             </div>
                             <div className="company-field">
-                                <label>PERSON LINK</label>
+                                <label>Person Link</label>
                                 {toggle(
                                     "Person link",
                                     linkEnabled,
@@ -471,7 +471,7 @@ function UserForm({
                                 )}
                             </div>
                             <div className="company-field">
-                                <label htmlFor="user-person">LINK TO</label>
+                                <label htmlFor="user-person">Link To</label>
                                 {editing && canLink ? (
                                     <ReferenceSelect
                                         id="user-person"
@@ -512,7 +512,7 @@ function UserForm({
                                 {error("person_id")}
                             </div>
                             <div className="company-field">
-                                <label>LINK ACTION</label>
+                                <label>Link Action</label>
                                 <button
                                     type="button"
                                     className="btn secondary"
@@ -561,7 +561,7 @@ function UserForm({
                                     </div>
                                     <div className="company-field">
                                         <label htmlFor="user-confirm">
-                                            CONFIRM PASSWORD
+                                            Confirm Password
                                         </label>
                                         <input
                                             id="user-confirm"
@@ -583,7 +583,7 @@ function UserForm({
                             )}
                         </div>
                         <div className="company-field user-company-access">
-                            <label>PORTAL COMPANY ACCESS</label>
+                            <label>Portal Company Access</label>
                             <div
                                 className="person-portal-companies"
                                 role="group"

@@ -1,3 +1,4 @@
+import { titleCaseLabel } from "../lib/labels";
 import {
     useImperativeHandle,
     useLayoutEffect,
@@ -481,7 +482,7 @@ export function EditableDetailTable<T extends object>({
                                     type="button"
                                     className="icon-action-btn"
                                     aria-label="Reload and review"
-                                    title="Reload the latest record and review before editing"
+                                    title="Reload The Latest Record And Review Before Editing"
                                     disabled={saving !== null}
                                     onClick={() => void reload(key)}
                                 >
@@ -510,7 +511,7 @@ export function EditableDetailTable<T extends object>({
                                 type="button"
                                 className="icon-action-btn cancel"
                                 aria-label="Cancel"
-                                title="Cancel row changes"
+                                title="Cancel Row Changes"
                                 disabled={saving !== null}
                                 onClick={() => removeDraft(key)}
                             >
@@ -525,7 +526,7 @@ export function EditableDetailTable<T extends object>({
                                         type="button"
                                         className="icon-action-btn"
                                         aria-label={`Edit ${rowLabel}`}
-                                        title="Edit row"
+                                        title="Edit Row"
                                         disabled={disabled}
                                         onClick={() => activate(record)}
                                     >
@@ -536,8 +537,8 @@ export function EditableDetailTable<T extends object>({
                                     <button
                                         type="button"
                                         className="icon-action-btn delete"
-                                        aria-label={`Delete ${rowLabel}`}
-                                        title="Delete record"
+                                        aria-label={`Remove ${rowLabel}`}
+                                        title="Remove Row"
                                         disabled={disabled}
                                         onClick={() => onDelete(record)}
                                     >
@@ -574,14 +575,14 @@ export function EditableDetailTable<T extends object>({
                                 <button
                                     type="button"
                                     className="editable-detail-heading"
-                                    aria-label={`Add ${singular.toLowerCase()}: ${column.label}`}
+                                    aria-label={`Add ${singular.toLowerCase()}: ${titleCaseLabel(column.label)}`}
                                     disabled={
                                         !canCreate ||
                                         disabled ||
                                         saving !== null
                                     }
                                 >
-                                    <span>{column.label}</span>
+                                    <span>{titleCaseLabel(column.label)}</span>
                                     <Plus size={10} />
                                 </button>
                             </th>

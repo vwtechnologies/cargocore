@@ -195,12 +195,12 @@ export function PeoplePage() {
                 }}
                 newAriaLabel="New person"
                 newButtonLabel="New"
-                listHeading="PEOPLE"
+                listHeading="People"
                 items={list.data?.data ?? []}
                 columns={[
                     {
                         key: "name",
-                        label: "PERSON",
+                        label: "Person",
                         render: (item) => (
                             <button
                                 type="button"
@@ -247,8 +247,8 @@ export function PeoplePage() {
                 }}
                 viewAllItems={directory.data?.data}
                 viewAllColumns={[
-                    { key: "name", label: "FULL NAME" },
-                    { key: "code", label: "PERSON CODE" },
+                    { key: "name", label: "Full Name" },
+                    { key: "code", label: "Person Code" },
                     { key: "cnic", label: "CNIC" },
                 ]}
                 onSelectFromViewAll={select}
@@ -400,7 +400,7 @@ export function PeoplePage() {
                                 key={person.id}
                                 entity="contacts"
                                 parent={{ entity: "people", id: person.id }}
-                                title="Contact information"
+                                title="Contact Information"
                             />
                         ) : person && tab === "markas" ? (
                             <ChildSection

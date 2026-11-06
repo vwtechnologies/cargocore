@@ -218,10 +218,10 @@ export function PersonBasic({
         setForm((current) => ({ ...current, [key]: value }));
     }
     const inputs = [
-        ["name", "Full name"],
-        ["father_husband_name", "Father / husband name"],
+        ["name", "Full Name"],
+        ["father_husband_name", "Father / Husband Name"],
         ["cnic", "CNIC"],
-        ["date_of_birth", "Date of birth"],
+        ["date_of_birth", "Date Of Birth"],
         ["gender", "Gender"],
         ["city_id", "Place"],
         ["ntn", "NTN"],
@@ -232,7 +232,7 @@ export function PersonBasic({
             <section className="company-card person-basic-card">
                 <div className="person-section-heading">
                     <User size={17} />
-                    <h3>Personal details</h3>
+                    <h3>Personal Details</h3>
                 </div>
                 <div className="person-basic-layout">
                     <form
@@ -382,7 +382,7 @@ export function PersonBasic({
                                 ))}
                                 <div className="company-field person-comments">
                                     <label htmlFor="person-comments">
-                                        Comments / notes
+                                        Comments / Notes
                                     </label>
                                     <textarea
                                         id="person-comments"
@@ -400,7 +400,7 @@ export function PersonBasic({
                                 </div>
                                 <div className="company-toggle-row">
                                     <span className="company-toggle-label">
-                                        STATUS
+                                        Status
                                     </span>
                                     <div className="company-toggle-switch">
                                         <button
@@ -450,18 +450,18 @@ export function PersonBasic({
                                                         )
                                                     }
                                                 />
-                                                This person is an employee
+                                                This Person Is An Employee
                                             </label>
                                         </div>
                                         {!!form.is_employee && (
                                             <div className="company-field person-employee-types">
                                                 <label htmlFor="person-employee-types">
-                                                    Employee types
+                                                    Employee Types
                                                 </label>
                                                 {canEdit ? (
                                                     <ReferenceSelect
                                                         id="person-employee-types"
-                                                        label="Employee types"
+                                                        label="Employee Types"
                                                         entity="employee-types"
                                                         multiple
                                                         showCode={false}

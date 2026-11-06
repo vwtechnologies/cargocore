@@ -35,7 +35,7 @@ test("cities edit in their cells, retain drafts across arrow navigation, and cre
     await second.getByRole("button", { name: "Cancel", exact: true }).click();
     await expect(second).toContainText("ISB");
     await expect(second).not.toContainText("ISB-DRAFT");
-    await grid.getByRole("columnheader", { name: /CITY NAME/ }).click();
+    await grid.getByRole("columnheader", { name: /City Name/i }).click();
     const createdRow = grid.getByRole("row", { name: "New city", exact: true });
     await expect(grid.locator("tbody tr").first()).toHaveAttribute(
         "data-row-key",
@@ -54,7 +54,7 @@ test("cities edit in their cells, retain drafts across arrow navigation, and cre
         createdRow.getByLabel("Short Name 1", { exact: true }),
     ).toBeFocused();
     await createdRow.getByLabel("Short Name 1", { exact: true }).fill("IHC");
-    await createdRow.getByRole("switch", { name: "City status" }).click();
+    await createdRow.getByRole("switch", { name: "City Status" }).click();
     await createdRow
         .getByRole("button", { name: "Save changes", exact: true })
         .click();
@@ -65,11 +65,11 @@ test("cities edit in their cells, retain drafts across arrow navigation, and cre
     await expect(saved).toContainText("IHC");
     await expect(saved).toContainText("Inactive");
     const remove = saved.getByRole("button", {
-        name: "Delete INLINE HEADER CITY",
+        name: "Remove INLINE HEADER CITY",
         exact: true,
     });
     await expect(remove.locator("svg")).toHaveAttribute("data-prefix", "fas");
-    await expect(remove).toHaveCSS("color", "rgb(220, 38, 38)");
+    await expect(remove).toHaveCSS("color", "rgb(163, 76, 76)");
     await page.screenshot({
         path: "test-results/cities-inline-table.png",
         fullPage: true,
@@ -112,7 +112,7 @@ test("branches and officers use compact rows while preserving their links and fu
     await expect(name).toHaveValue("RAWALPINDI BRANCH DRAFT");
     await first.getByRole("button", { name: "Cancel", exact: true }).click();
     await expect(first).toContainText("Rawalpindi Main Branch");
-    await grid.getByRole("columnheader", { name: /BRANCH NAME/ }).click();
+    await grid.getByRole("columnheader", { name: /Branch Name/i }).click();
     const row = grid.getByRole("row", { name: "New branch", exact: true });
     await expect(row.locator("td[colspan]")).toHaveCount(0);
     await expect(row.locator("td")).toHaveCount(8);
@@ -146,7 +146,7 @@ test("branches and officers use compact rows while preserving their links and fu
     expect(branch.phone_numbers).toEqual(["000123", "000456"]);
     expect(branch.address).toBe("HARBOUR ROAD");
     const officers = page.getByRole("grid", { name: "Officers", exact: true });
-    await officers.getByRole("columnheader", { name: /OFFICER NAME/ }).click();
+    await officers.getByRole("columnheader", { name: /Officer Name/i }).click();
     const officer = officers.getByRole("row", {
         name: "New officer",
         exact: true,
@@ -211,7 +211,7 @@ test("contact records use the shared row editor and preserve saved values on can
     await page.goto(`/people/${people[0].id}`);
     await page.getByRole("tab", { name: "Contacts", exact: true }).click();
     const grid = page.getByRole("grid", {
-        name: "Contact information",
+        name: "Contact Information",
         exact: true,
     });
     await expect(grid.getByRole("columnheader", { name: /LABEL/ })).toHaveCount(
@@ -219,7 +219,7 @@ test("contact records use the shared row editor and preserve saved values on can
     );
     await grid
         .getByRole("columnheader", {
-            name: "Add contact: ADDRESS",
+            name: "Add contact: Address",
             exact: true,
         })
         .click();
@@ -229,12 +229,12 @@ test("contact records use the shared row editor and preserve saved values on can
     await row
         .getByLabel("Address", { exact: true })
         .fill("Inline Contact Office");
-    await row.getByLabel("Phone number", { exact: true }).fill("051100100");
-    await row.getByLabel("Mobile number", { exact: true }).fill("0300000000");
+    await row.getByLabel("Phone Number", { exact: true }).fill("051100100");
+    await row.getByLabel("Mobile Number", { exact: true }).fill("0300000000");
     await row
-        .getByLabel("Email address", { exact: true })
+        .getByLabel("Email Address", { exact: true })
         .fill("inline-contact@example.test");
-    await expect(row.getByLabel("Email address", { exact: true })).toHaveValue(
+    await expect(row.getByLabel("Email Address", { exact: true })).toHaveValue(
         "INLINE-CONTACT@EXAMPLE.TEST",
     );
     await row
@@ -246,17 +246,17 @@ test("contact records use the shared row editor and preserve saved values on can
     });
     await expect(saved).toContainText("051100100");
     await saved.locator('td[data-column="phone"]').click();
-    await saved.getByLabel("Phone number", { exact: true }).fill("UNSAVED");
+    await saved.getByLabel("Phone Number", { exact: true }).fill("UNSAVED");
     await saved.getByRole("button", { name: "Cancel", exact: true }).click();
-    await expect(saved.getByLabel("Phone number", { exact: true })).toHaveCount(
+    await expect(saved.getByLabel("Phone Number", { exact: true })).toHaveCount(
         0,
     );
     await expect(saved).toContainText("051100100");
     await expect(saved).not.toContainText("UNSAVED");
     await saved.locator('td[data-column="phone"]').click();
-    await saved.getByLabel("Phone number", { exact: true }).fill("051222000");
+    await saved.getByLabel("Phone Number", { exact: true }).fill("051222000");
     await saved
-        .getByLabel("Phone number", { exact: true })
+        .getByLabel("Phone Number", { exact: true })
         .press("ControlOrMeta+s");
     await expect(saved.locator("input")).toHaveCount(0);
     await expect(saved).toContainText("051222000");

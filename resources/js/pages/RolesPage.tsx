@@ -1,3 +1,4 @@
+import { titleCaseLabel } from "../lib/labels";
 import { useEffect, useRef, useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
@@ -23,7 +24,7 @@ const groups = [
             ["geography", "Country & City"],
             ["banks", "Banks, Branches & Officers"],
             ["employee-types", "Employee Type"],
-            ["markas", "MARKA"],
+            ["markas", "Marka"],
             ["people", "Person Information"],
             [
                 "associations",
@@ -57,6 +58,7 @@ export function RolesPage() {
     const [status, setStatus] = useState(true);
     const [permissions, setPermissions] = useState<string[]>([]);
     const [search, setSearch] = useState("");
+    const [permissionSearch, setPermissionSearch] = useState("");
     const [page, setPage] = useState(1);
     const query = useQuery({
         queryKey: ["management-roles"],
@@ -172,12 +174,12 @@ export function RolesPage() {
                 onDelete={() => {}}
                 newButtonLabel="New role"
                 newAriaLabel="New role"
-                listHeading="ROLES"
+                listHeading="Roles"
                 items={filtered.slice((page - 1) * 15, page * 15)}
                 columns={[
                     {
                         key: "name",
-                        label: "ROLE NAME",
+                        label: "Role Name",
                         render: (role) => (
                             <span className="role-list-name">
                                 <span>{String(role.name)}</span>
@@ -236,7 +238,7 @@ export function RolesPage() {
                         <div className="company-card-body role-name-fields">
                             <div className="company-field">
                                 <label htmlFor="role-name">
-                                    ROLE NAME{" "}
+                                    Role Name{" "}
                                     <span className="req-star">*</span>
                                 </label>
                                 <input
@@ -257,7 +259,7 @@ export function RolesPage() {
                                 />
                             </div>
                             <div className="company-field">
-                                <label htmlFor="role-status">STATUS</label>
+                                <label htmlFor="role-status">Status</label>
                                 <button
                                     id="role-status"
                                     type="button"
@@ -285,16 +287,26 @@ export function RolesPage() {
                             </div>
                         </div>
                         <div className="table-scroll role-permission-scroll">
+                            <div className="table-toolbar">
+                                <input
+                                    aria-label="Search Permissions"
+                                    placeholder="Search permissions…"
+                                    value={permissionSearch}
+                                    onChange={(event) =>
+                                        setPermissionSearch(event.target.value)
+                                    }
+                                />
+                            </div>
                             <table
                                 className="role-permission-matrix"
                                 aria-label="Role permissions"
                             >
                                 <thead>
                                     <tr>
-                                        <th scope="col">FORM</th>
+                                        <th scope="col">Form</th>
                                         {actions.map((action) => (
                                             <th key={action} scope="col">
-                                                {action.toUpperCase()}
+                                                {titleCaseLabel(action)}
                                             </th>
                                         ))}
                                     </tr>
@@ -304,7 +316,14 @@ export function RolesPage() {
                                         <RoleGroup
                                             key={group.label}
                                             label={group.label}
-                                            rows={group.rows}
+                                            rows={group.rows.filter(
+                                                ([, title]) =>
+                                                    title
+                                                        .toLowerCase()
+                                                        .includes(
+                                                            permissionSearch.toLowerCase(),
+                                                        ),
+                                            )}
                                             all={all}
                                             permissions={permissions}
                                             locked={!editable || save.isPending}

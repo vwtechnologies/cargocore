@@ -1,3 +1,4 @@
+import { titleCaseLabel } from "../lib/labels";
 import React, { useState, useEffect, useRef, useMemo } from "react";
 import { Link } from "react-router-dom";
 import {
@@ -164,7 +165,7 @@ export function MasterDetailShell<T extends RecordData = RecordData>({
         ),
         {
             key: "status",
-            label: "STATUS",
+            label: "Status",
             render: (item) => (
                 <StatusIndicator active={item.status !== false} />
             ),
@@ -453,7 +454,7 @@ export function MasterDetailShell<T extends RecordData = RecordData>({
                                 className="btn-company-new"
                                 aria-label={newAriaLabel}
                                 aria-keyshortcuts="Control+n Meta+n"
-                                title="New record (Ctrl/Cmd+N)"
+                                title="New Record (Ctrl/Cmd+N)"
                                 onClick={onStartCreate}
                                 disabled={!canCreate}
                             >
@@ -465,7 +466,7 @@ export function MasterDetailShell<T extends RecordData = RecordData>({
                                 type="button"
                                 className="btn-company-edit"
                                 aria-keyshortcuts="Control+e Meta+e"
-                                title="Edit selected record (Ctrl/Cmd+E)"
+                                title="Edit Selected Record (Ctrl/Cmd+E)"
                                 onClick={onStartEdit}
                                 disabled={!hasSelectedItem || !canUpdate}
                                 aria-label="Edit"
@@ -495,7 +496,7 @@ export function MasterDetailShell<T extends RecordData = RecordData>({
                 <aside className="company-list-panel" ref={listPanelRef}>
                     <div className="company-list-topbar">
                         <span className="company-list-heading">
-                            {listHeading || title.toUpperCase()}
+                            {titleCaseLabel(listHeading || title)}
                         </span>
                         <button
                             type="button"
@@ -544,7 +545,7 @@ export function MasterDetailShell<T extends RecordData = RecordData>({
                                             }
                                             className={col.className}
                                         >
-                                            {col.label}
+                                            {titleCaseLabel(col.label)}
                                         </th>
                                     ))}
                                     <th
@@ -552,7 +553,7 @@ export function MasterDetailShell<T extends RecordData = RecordData>({
                                         aria-label="Status"
                                     >
                                         <span className="visually-hidden">
-                                            STATUS
+                                            Status
                                         </span>
                                     </th>
                                 </tr>
@@ -681,7 +682,7 @@ export function MasterDetailShell<T extends RecordData = RecordData>({
                                 type="button"
                                 disabled={page <= 1}
                                 onClick={() => onPageChange(1)}
-                                title="First page"
+                                title="First Page"
                             >
                                 <ChevronsLeft size={15} />
                             </button>
@@ -691,7 +692,7 @@ export function MasterDetailShell<T extends RecordData = RecordData>({
                                 onClick={() =>
                                     onPageChange(Math.max(1, page - 1))
                                 }
-                                title="Previous page"
+                                title="Previous Page"
                             >
                                 <ChevronLeft size={15} />
                             </button>
@@ -699,7 +700,7 @@ export function MasterDetailShell<T extends RecordData = RecordData>({
                                 type="button"
                                 disabled={page >= lastPage}
                                 onClick={() => onPageChange(page + 1)}
-                                title="Next page"
+                                title="Next Page"
                             >
                                 <ChevronRight size={15} />
                             </button>
@@ -707,7 +708,7 @@ export function MasterDetailShell<T extends RecordData = RecordData>({
                                 type="button"
                                 disabled={page >= lastPage}
                                 onClick={() => onPageChange(lastPage)}
-                                title="Last page"
+                                title="Last Page"
                             >
                                 <ChevronsRight size={15} />
                             </button>
@@ -794,7 +795,7 @@ export function MasterDetailShell<T extends RecordData = RecordData>({
                                                         : undefined
                                                 }
                                             >
-                                                {col.label}
+                                                {titleCaseLabel(col.label)}
                                             </th>
                                         ))}
                                     </tr>
@@ -861,9 +862,9 @@ export function MasterDetailShell<T extends RecordData = RecordData>({
                                                                     key={
                                                                         col.key
                                                                     }
-                                                                    data-label={
-                                                                        col.label
-                                                                    }
+                                                                    data-label={titleCaseLabel(
+                                                                        col.label,
+                                                                    )}
                                                                     className={
                                                                         col.key ===
                                                                         primaryDirectoryColumn

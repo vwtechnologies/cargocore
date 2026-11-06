@@ -213,7 +213,7 @@ export function SearchableSelect({
                     justifyContent: "space-between",
                     gap: "8px",
                     background: readOnly || disabled ? "#f8faf9" : "#ffffff",
-                    border: isOpen ? "1px solid #004828" : "1px solid #cfdad4",
+                    border: isOpen ? "1px solid #18362d" : "1px solid #cfdad4",
                     borderRadius: compact ? "6px" : "8px",
                     padding: compact ? "6px 10px" : "9px 12px",
                     minHeight: compact ? "34px" : "42px",
@@ -249,7 +249,7 @@ export function SearchableSelect({
                                         padding: "1px 6px",
                                         borderRadius: "4px",
                                         background: "#e8f5ee",
-                                        color: "#004828",
+                                        color: "#18362d",
                                     }}
                                 >
                                     {selectedOption.code}
@@ -272,7 +272,7 @@ export function SearchableSelect({
                         <span
                             role="button"
                             tabIndex={-1}
-                            title="Clear selection"
+                            title="Clear Selection"
                             onClick={handleClear}
                             style={{
                                 display: "inline-flex",
@@ -423,7 +423,7 @@ export function SearchableSelect({
                                                   : "transparent",
                                             color:
                                                 isHighlighted || isSelected
-                                                    ? "#004828"
+                                                    ? "#18362d"
                                                     : "#1f2937",
                                             fontWeight: isSelected ? 600 : 400,
                                             transition:
@@ -489,7 +489,7 @@ export function SearchableSelect({
                                             <Check
                                                 size={15}
                                                 style={{
-                                                    color: "#004828",
+                                                    color: "#18362d",
                                                     flexShrink: 0,
                                                 }}
                                             />

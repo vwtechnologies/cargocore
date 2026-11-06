@@ -218,7 +218,7 @@ export function Documents({
                 ) : query.data?.data.filter((d) => d.kind === "identification")
                       .length === 0 ? (
                     <Empty
-                        title="No documents uploaded"
+                        title="No Documents Uploaded"
                         description="Attach identification documents as PDF, JPG, PNG or WebP files."
                     />
                 ) : (
@@ -242,7 +242,7 @@ export function Documents({
                                             {(Number(doc.size) / 1024).toFixed(
                                                 0,
                                             )}{" "}
-                                            KB
+                                            Kb
                                         </small>
                                         <small>
                                             {doc.document_number
@@ -256,7 +256,7 @@ export function Documents({
                                     <div className="button-group">
                                         <a
                                             className="icon-button"
-                                            title="Download document"
+                                            title="Download Document"
                                             href={`/api/v1/people/${person}/documents/${doc.id}/download?context=management`}
                                         >
                                             <Download size={17} />
@@ -264,7 +264,7 @@ export function Documents({
                                         {can("update") && (
                                             <button
                                                 className="icon-button"
-                                                title="Replace document"
+                                                title="Replace Document"
                                                 onClick={() => edit(doc)}
                                             >
                                                 <Upload size={17} />
@@ -273,7 +273,7 @@ export function Documents({
                                         {can("delete") && (
                                             <button
                                                 className="icon-button delete-button"
-                                                title="Remove document"
+                                                title="Remove Document"
                                                 onClick={() => setRemove(doc)}
                                             >
                                                 <Trash2 size={17} />
@@ -302,7 +302,7 @@ export function Documents({
                         <>
                             <div className="field">
                                 <label htmlFor="document-type">
-                                    Document type
+                                    Document Type
                                 </label>
                                 <input
                                     id="document-type"
@@ -313,7 +313,7 @@ export function Documents({
                             </div>
                             <div className="field">
                                 <label htmlFor="document-number">
-                                    Document number
+                                    Document Number
                                 </label>
                                 <input
                                     id="document-number"
@@ -323,7 +323,7 @@ export function Documents({
                             </div>
                             <div className="field">
                                 <label htmlFor="document-expiry">
-                                    Expiry date
+                                    Expiry Date
                                 </label>
                                 <input
                                     id="document-expiry"
@@ -358,7 +358,7 @@ export function Documents({
             </Modal>
             <Confirm
                 open={!!remove}
-                title="Remove this document?"
+                title="Remove This Document?"
                 description="The document will no longer appear in this person's active profile."
                 onClose={() => setRemove(undefined)}
                 onConfirm={() => deletion.mutate()}
@@ -441,7 +441,7 @@ export function EmployeeDetails({
     return (
         <section className="panel">
             <PanelTitle
-                title="Employee details"
+                title="Employee Details"
                 subtitle="Salary and employee types are shared across this person’s companies."
                 action={
                     query.data?.eligible &&
@@ -488,7 +488,7 @@ export function EmployeeDetails({
                     {joiningDate !== undefined && (
                         <div className="field">
                             <label htmlFor="employee-joining-date">
-                                Joining date
+                                Joining Date
                             </label>
                             <input
                                 id="employee-joining-date"
@@ -513,7 +513,7 @@ export function EmployeeDetails({
                         />
                     </div>
                     <div className="field">
-                        <label htmlFor="employee-types">Employee types</label>
+                        <label htmlFor="employee-types">Employee Types</label>
                         <ReferenceSelect
                             id="employee-types"
                             entity="employee-types"
@@ -550,7 +550,7 @@ export function EmployeeDetails({
                 <dl className="detail-grid">
                     {joiningDate !== undefined && (
                         <div>
-                            <dt>Joining date</dt>
+                            <dt>Joining Date</dt>
                             <dd>{joiningDate || "—"}</dd>
                         </div>
                     )}
@@ -559,7 +559,7 @@ export function EmployeeDetails({
                         <dd className="amount">{money(record.salary)}</dd>
                     </div>
                     <div>
-                        <dt>Employee types</dt>
+                        <dt>Employee Types</dt>
                         <dd>
                             {record.types.map((t) => (
                                 <span key={t.id} className="value-chip">
@@ -571,7 +571,7 @@ export function EmployeeDetails({
                 </dl>
             ) : (
                 <Empty
-                    title="No employee details"
+                    title="No Employee Details"
                     description="Mark this person as an Employee in Personal Details or assign the Employee business role, then add salary and employee types here."
                 />
             )}
@@ -583,7 +583,7 @@ export function Associations({ person }: { person: number }) {
         <ChildSection
             entity="associations"
             parent={{ entity: "people", id: person }}
-            title="Company associations"
+            title="Company Associations"
         >
             {(r) => (
                 <div className="nested-section">
@@ -621,7 +621,7 @@ export function UserAccess({ person }: { person: number }) {
     return (
         <section className="panel">
             <PanelTitle
-                title="System access"
+                title="System Access"
                 subtitle="User credentials and permissions are managed separately from this profile."
             />
             {query.isPending ? (
@@ -653,7 +653,7 @@ export function UserAccess({ person }: { person: number }) {
                 </div>
             ) : (
                 <Empty
-                    title="No system account"
+                    title="No System Account"
                     description="A person can be part of your business without having system access."
                     action={
                         session.permissions.includes("users.create") && (
@@ -726,7 +726,7 @@ function ClassificationBatch({ association }: { association: number }) {
                         setAmounts({});
                     }
                 }}
-                title="Assign business roles"
+                title="Assign Business Roles"
                 description="Each selected business role can have its own opening amount in PKR."
             >
                 <form
@@ -738,7 +738,7 @@ function ClassificationBatch({ association }: { association: number }) {
                 >
                     <div className="field">
                         <label htmlFor="business-classifications">
-                            Business roles
+                            Business Roles
                         </label>
                         <ReferenceSelect
                             id="business-classifications"
@@ -753,7 +753,7 @@ function ClassificationBatch({ association }: { association: number }) {
                             <label htmlFor={`amount-${id}`}>
                                 {lookup.data?.data.find((t) => t.id === id)
                                     ?.name ?? `Type ${id}`}{" "}
-                                · Opening amount (PKR)
+                                · Opening Amount (PKR)
                             </label>
                             <input
                                 id={`amount-${id}`}

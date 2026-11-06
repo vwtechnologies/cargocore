@@ -1,3 +1,4 @@
+import { titleCaseLabel } from "../lib/labels";
 import { useEffect, useRef, useState, type ReactNode } from "react";
 import * as Dialog from "@radix-ui/react-dialog";
 import { PageActions } from "./PageActions";
@@ -305,7 +306,7 @@ export function SectionHeader({
         <div className="page-heading">
             <div>
                 {eyebrow && <div className="eyebrow">{eyebrow}</div>}
-                <h1>{title}</h1>
+                <h1>{titleCaseLabel(title)}</h1>
                 {description && <p>{description}</p>}
             </div>
             {actions && <PageActions>{actions}</PageActions>}
@@ -324,7 +325,7 @@ export function PanelTitle({
     return (
         <div className="panel-title">
             <div>
-                <h2>{title}</h2>
+                <h2>{titleCaseLabel(title)}</h2>
                 {subtitle && <p>{subtitle}</p>}
             </div>
             {action}

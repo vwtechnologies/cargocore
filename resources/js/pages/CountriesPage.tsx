@@ -1,7 +1,16 @@
+import { titleCaseLabel } from "../lib/labels";
 import { useState, useMemo, useEffect, useRef } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { Globe, Plus, Pencil, Trash2, Check, X } from "../components/icons";
+import {
+    Globe,
+    Plus,
+    Pencil,
+    Trash2,
+    Check,
+    X,
+    Search,
+} from "../components/icons";
 import { toast } from "sonner";
 import { useDirty } from "../lib/dirty";
 import { useSession } from "../lib/session";
@@ -51,6 +60,8 @@ export function CountriesPage() {
     const cityTable = useRef<DetailTableHandle>(null);
 
     const [search, setSearch] = useState("");
+    const [citySearch, setCitySearch] = useState("");
+    const citySearchTerm = useDebounced(citySearch);
     const debouncedSearch = useDebounced(search);
     const [page, setPage] = useState(1);
 
@@ -168,10 +179,10 @@ export function CountriesPage() {
 
     // Query Cities for selected country
     const { data: citiesData, isLoading: isCitiesLoading } = useQuery({
-        queryKey: ["cities", selectedCountry?.id],
+        queryKey: ["cities", selectedCountry?.id, citySearchTerm],
         queryFn: () =>
             managementApi<PageResult<RecordData>>(
-                `/api/v1/countries/${selectedCountry?.id}/cities?per_page=100`,
+                `/api/v1/countries/${selectedCountry?.id}/cities?${params({ per_page: 100, search: citySearchTerm })}`,
             ),
         enabled: !!selectedCountry?.id && !isCreating,
     });
@@ -368,14 +379,14 @@ export function CountriesPage() {
     const masterColumns: MasterColumn<RecordData>[] = [
         {
             key: "short_name",
-            label: "SHORT NAME",
+            label: "Short Name",
             width: "30%",
             className: "code-cell",
             render: (c) => String(c.short_name || "—"),
         },
         {
             key: "name",
-            label: "COUNTRY NAME",
+            label: "Country Name",
             width: "45%",
             className: "name-cell",
             render: (c) => (
@@ -394,7 +405,7 @@ export function CountriesPage() {
         },
         {
             key: "display_sequence",
-            label: "ORDER",
+            label: "Order",
             width: "25%",
             render: (c) => String(c.display_sequence ?? "—"),
         },
@@ -402,12 +413,12 @@ export function CountriesPage() {
 
     // Columns for View All Modal
     const viewAllColumns: ViewAllColumn<RecordData>[] = [
-        { key: "short_name", label: "SHORT NAME", width: "20%" },
-        { key: "name", label: "COUNTRY NAME", width: "40%" },
-        { key: "display_sequence", label: "DISPLAY ORDER", width: "20%" },
+        { key: "short_name", label: "Short Name", width: "20%" },
+        { key: "name", label: "Country Name", width: "40%" },
+        { key: "display_sequence", label: "Display Order", width: "20%" },
         {
             key: "status",
-            label: "STATUS",
+            label: "Status",
             width: "20%",
             render: (country) => (country.status ? "Active" : "Inactive"),
         },
@@ -422,7 +433,7 @@ export function CountriesPage() {
             ] as const
         ).map(([key, label]) => ({
             key,
-            label: label.toUpperCase(),
+            label: titleCaseLabel(label),
             render: (_record: RecordData, value: CityFormData) =>
                 value[key] || "—",
             editor: (
@@ -440,7 +451,7 @@ export function CountriesPage() {
         })),
         {
             key: "status",
-            label: "STATUS",
+            label: "Status",
             width: "110px",
             render: (_record, value) => (
                 <Badge
@@ -450,7 +461,7 @@ export function CountriesPage() {
             ),
             editor: (value, change) => (
                 <InlineStatus
-                    label="City status"
+                    label="City Status"
                     value={value.status}
                     onChange={(status) => change("status", status)}
                 />
@@ -481,7 +492,7 @@ export function CountriesPage() {
             onCancel={handleCancelEdit}
             onDelete={() => setDeletingCountry(true)}
             newAriaLabel="Add record"
-            listHeading="COUNTRIES"
+            listHeading="Countries"
             items={countries}
             columns={masterColumns}
             selectedId={selectedCountry?.id ?? null}
@@ -558,7 +569,7 @@ export function CountriesPage() {
                     <div className="country-fields-grid country-primary-fields">
                         <div className="company-field">
                             <label htmlFor="country-name">
-                                COUNTRY NAME{" "}
+                                Country Name{" "}
                                 <span className="req-star" aria-hidden="true">
                                     *
                                 </span>
@@ -583,7 +594,7 @@ export function CountriesPage() {
                         </div>
                         <div className="company-field">
                             <label htmlFor="country-short-name">
-                                SHORT NAME
+                                Short Name
                             </label>
                             <input
                                 id="country-short-name"
@@ -603,7 +614,7 @@ export function CountriesPage() {
                         </div>
                         <div className="company-field">
                             <label htmlFor="country-display-order">
-                                DISPLAY ORDER
+                                Display Order
                             </label>
                             <select
                                 id="country-display-order"
@@ -628,7 +639,7 @@ export function CountriesPage() {
                         </div>
                         {/* Active Status Switch */}
                         <div className="company-field country-status-field">
-                            <span className="company-toggle-label">STATUS</span>
+                            <span className="company-toggle-label">Status</span>
                             <div className="company-toggle-switch">
                                 <button
                                     type="button"
@@ -680,10 +691,23 @@ export function CountriesPage() {
                             onClick={() => cityTable.current?.create()}
                         >
                             <Plus size={15} />
-                            <span>Add</span>
+                            <span>Add Row</span>
                         </button>
                     </div>
 
+                    <div className="table-toolbar">
+                        <div className="search-input">
+                            <Search size={16} />
+                            <input
+                                aria-label="Search Cities"
+                                placeholder="Search cities…"
+                                value={citySearch}
+                                onChange={(event) =>
+                                    setCitySearch(event.target.value)
+                                }
+                            />
+                        </div>
+                    </div>
                     <EditableDetailTable<CityFormData>
                         key={selectedCountry.id}
                         controllerRef={cityTable}

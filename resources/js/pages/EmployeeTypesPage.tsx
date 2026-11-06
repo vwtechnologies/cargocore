@@ -316,7 +316,7 @@ export function EmployeeTypesPage() {
     const masterColumns: MasterColumn<RecordData>[] = [
         {
             key: "name",
-            label: "EMPLOYEE TYPE",
+            label: "Employee Type",
             width: "65%",
             className: "name-cell",
             render: (item) => (
@@ -335,7 +335,7 @@ export function EmployeeTypesPage() {
         },
         {
             key: "status",
-            label: "STATUS",
+            label: "Status",
             width: "35%",
             render: (item) => (item.status ? "Active" : "Inactive"),
         },
@@ -343,10 +343,10 @@ export function EmployeeTypesPage() {
 
     // View All Modal Columns
     const viewAllColumns: ViewAllColumn<RecordData>[] = [
-        { key: "name", label: "EMPLOYEE TYPE", width: "75%" },
+        { key: "name", label: "Employee Type", width: "75%" },
         {
             key: "status",
-            label: "STATUS",
+            label: "Status",
             width: "25%",
             render: (item) => (item.status ? "Active" : "Inactive"),
         },
@@ -377,7 +377,7 @@ export function EmployeeTypesPage() {
                 onCancel={handleCancel}
                 onDelete={() => setIsDeleting(true)}
                 newAriaLabel={id ? "New employee type" : "Add record"}
-                listHeading="EMPLOYEE TYPES"
+                listHeading="Employee Types"
                 items={employeeTypes}
                 columns={masterColumns}
                 selectedId={selectedEmployeeType?.id ?? null}
@@ -464,7 +464,7 @@ export function EmployeeTypesPage() {
                             <div className="country-fields-grid employee-type-fields">
                                 <div className="company-field">
                                     <label htmlFor="emp-name">
-                                        EMPLOYEE TYPE{" "}
+                                        Employee Type{" "}
                                         <span className="required-star">*</span>
                                     </label>
                                     <input
@@ -486,7 +486,7 @@ export function EmployeeTypesPage() {
                                 </div>
                                 <div className="company-toggle-row">
                                     <span className="company-toggle-label">
-                                        STATUS
+                                        Status
                                     </span>
                                     <div className="company-toggle-switch">
                                         <button
@@ -547,7 +547,7 @@ export function EmployeeTypesPage() {
                                 <AlertCircle
                                     size={22}
                                     style={{
-                                        color: "#f59e0b",
+                                        color: "#a1814c",
                                         flexShrink: 0,
                                         marginTop: "2px",
                                     }}
@@ -612,7 +612,7 @@ export function EmployeeTypesPage() {
                                     style={{
                                         padding: "6px 14px",
                                         fontSize: "13px",
-                                        color: "#b91c1c",
+                                        color: "#873d3d",
                                         background: "#fee2e2",
                                         border: "1px solid #fecaca",
                                         borderRadius: "6px",
@@ -638,7 +638,7 @@ export function EmployeeTypesPage() {
                                         padding: "6px 14px",
                                         fontSize: "13px",
                                         color: "#ffffff",
-                                        background: "#2bb673",
+                                        background: "#3e6957",
                                         border: "none",
                                         borderRadius: "6px",
                                         fontWeight: 600,

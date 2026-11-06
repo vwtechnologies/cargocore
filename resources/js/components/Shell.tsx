@@ -93,7 +93,7 @@ const navigationGroups = [
                 module: "roles",
             },
             {
-                label: "Audit history",
+                label: "Audit History",
                 path: "/audit",
                 icon: History,
                 module: "audit",
@@ -436,7 +436,7 @@ export function Shell() {
                                 <button
                                     onClick={logout}
                                     className="topbar-dropdown-link"
-                                    style={{ color: "#b91c1c" }}
+                                    style={{ color: "#873d3d" }}
                                 >
                                     <LogOut size={15} />
                                     <span>Sign out</span>
@@ -483,7 +483,7 @@ export function Shell() {
                                     <button
                                         className="sidebar-close"
                                         aria-label="Close navigation"
-                                        title="Close navigation"
+                                        title="Close Navigation"
                                     >
                                         <ArrowLeft size={18} />
                                     </button>
@@ -599,7 +599,7 @@ function WorkspaceSearch({
         <Modal
             open={open}
             onClose={onClose}
-            title="Search your workspace"
+            title="Search Your Workspace"
             description="Find companies, people, banks, or MARKA codes."
         >
             <div className="command-search">
@@ -654,7 +654,7 @@ function WorkspaceSearch({
                             ))}
                             {query.data?.every((g) => !g.data.length) && (
                                 <Empty
-                                    title="No matching records"
+                                    title="No Matching Records"
                                     description="Try another name or code."
                                 />
                             )}

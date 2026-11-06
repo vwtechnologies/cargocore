@@ -223,7 +223,7 @@ export function PersonAccount({
                         <div className="person-fields-grid">
                             <div className="company-field">
                                 <label htmlFor="person-username">
-                                    USERNAME{" "}
+                                    Username{" "}
                                     <span className="required-star">*</span>
                                 </label>
                                 <input
@@ -247,7 +247,7 @@ export function PersonAccount({
                             </div>
                             <div className="company-field">
                                 <label htmlFor="person-user-role">
-                                    USER ROLE{" "}
+                                    User Role{" "}
                                     <span className="required-star">*</span>
                                 </label>
                                 <select
@@ -316,7 +316,7 @@ export function PersonAccount({
                                     </div>
                                     <div className="company-field">
                                         <label htmlFor="person-password-confirmation">
-                                            CONFIRM PASSWORD
+                                            Confirm Password
                                         </label>
                                         <input
                                             type="password"
@@ -337,7 +337,7 @@ export function PersonAccount({
                                 </>
                             )}
                             <div className="company-field person-comments">
-                                <label>PORTAL COMPANY ACCESS</label>
+                                <label>Portal Company Access</label>
                                 <div
                                     className="person-portal-companies"
                                     role="group"

@@ -1,3 +1,4 @@
+import { titleCaseLabel } from "../lib/labels";
 import { useMemo, useRef, useState } from "react";
 import { useMutation, useQuery } from "@tanstack/react-query";
 import { toast } from "sonner";
@@ -105,7 +106,7 @@ export function RelatedDetailTable({
     }
     const columns: DetailColumn<Values>[] = fields.map(([key, field]) => ({
         key,
-        label: field.label.toUpperCase(),
+        label: titleCaseLabel(field.label),
         width:
             field.type === "boolean"
                 ? "100px"
@@ -120,7 +121,7 @@ export function RelatedDetailTable({
             ) : field.type === "reference" ? (
                 <ReferenceSelect
                     entity={field.entity!}
-                    label={field.label}
+                    label={titleCaseLabel(field.label)}
                     value={value[key]}
                     readOnly
                     showCode={false}
@@ -131,10 +132,21 @@ export function RelatedDetailTable({
                 String(value[key] || "—")
             ),
         editor: (value, change) => {
+            if (field.depends && !value[field.depends])
+                return (
+                    <span className="muted">
+                        Select{" "}
+                        {titleCaseLabel(
+                            definition.fields[field.depends]?.label ??
+                                field.depends,
+                        )}{" "}
+                        First
+                    </span>
+                );
             if (field.type === "boolean")
                 return (
                     <InlineStatus
-                        label={field.label}
+                        label={titleCaseLabel(field.label)}
                         value={!!value[key]}
                         onChange={(status) => change(key, status)}
                     />
@@ -143,7 +155,7 @@ export function RelatedDetailTable({
                 return (
                     <ReferenceSelect
                         entity={field.entity!}
-                        label={field.label}
+                        label={titleCaseLabel(field.label)}
                         value={value[key]}
                         showCode={false}
                         filters={referenceFilters(key, value)}
@@ -167,7 +179,7 @@ export function RelatedDetailTable({
                 );
             return (
                 <input
-                    aria-label={field.label}
+                    aria-label={titleCaseLabel(field.label)}
                     type={
                         field.type === "date"
                             ? "date"
@@ -192,7 +204,7 @@ export function RelatedDetailTable({
     if (entity === "person-markas") {
         columns.splice(1, 0, {
             key: "marka_description",
-            label: "MARKA DESCRIPTION",
+            label: "Marka Description",
             width: "300px",
             render: (record) => String(record?.marka_description ?? "—"),
             editor: (value) => <MarkaDescription id={value.marka_id} />,
@@ -231,7 +243,7 @@ export function RelatedDetailTable({
                             onClick={() => table.current?.create()}
                         >
                             <Plus size={15} />
-                            Add record
+                            Add Row
                         </button>
                     )
                 }
@@ -272,7 +284,7 @@ export function RelatedDetailTable({
                     <option value="id">Record order</option>
                     {fields.map(([key, field]) => (
                         <option key={key} value={key}>
-                            {field.label}
+                            {titleCaseLabel(field.label)}
                         </option>
                     ))}
                 </select>

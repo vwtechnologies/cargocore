@@ -103,18 +103,18 @@ export function ModulePage() {
     const tabs =
         entity === "people"
             ? [
-                  ["details", "Personal details"],
+                  ["details", "Personal Details"],
                   ["contacts", "Contacts"],
                   ["documents", "Documents"],
-                  ["accounts", "Bank accounts"],
-                  ["associations", "Business associations"],
-                  ["employee", "Employee details"],
-                  ["access", "User access"],
+                  ["accounts", "Bank Accounts"],
+                  ["associations", "Business Associations"],
+                  ["employee", "Employee Details"],
+                  ["access", "User Access"],
               ]
             : entity === "banks"
               ? [
                     ["details", "Branches"],
-                    ["officers", "Bank officers"],
+                    ["officers", "Bank Officers"],
                 ]
               : [];
     const parent = id ? { entity, id: Number(id) } : undefined;
@@ -147,7 +147,7 @@ export function ModulePage() {
                     {entity === "people" && (
                         <div className="people-filters">
                             <div className="field">
-                                <label>Business role</label>
+                                <label>Business Role</label>
                                 <ReferenceSelect
                                     entity="business-types"
                                     value={businessType}
@@ -162,7 +162,7 @@ export function ModulePage() {
                                         setFilterCompany(e.target.checked)
                                     }
                                 />
-                                Selected company only
+                                Selected Company Only
                             </label>
                         </div>
                     )}
@@ -328,7 +328,7 @@ export function ModulePage() {
                                     <ChildSection
                                         entity="sub-companies"
                                         parent={parent}
-                                        title="Sub-companies"
+                                        title="Sub-Companies"
                                     />
                                 )}
                                 {entity === "countries" && (
@@ -343,13 +343,13 @@ export function ModulePage() {
                                         <ChildSection
                                             entity="officers"
                                             parent={parent}
-                                            title="Bank-wide officers"
+                                            title="Bank-Wide Officers"
                                         />
                                     ) : (
                                         <ChildSection
                                             entity="branches"
                                             parent={parent}
-                                            title="Bank branches"
+                                            title="Bank Branches"
                                         >
                                             {(branch) => (
                                                 <div className="nested-section">
@@ -389,7 +389,7 @@ export function ModulePage() {
                                         <ChildSection
                                             entity="contacts"
                                             parent={parent}
-                                            title="Contact information"
+                                            title="Contact Information"
                                         />
                                     ) : tab === "documents" ? (
                                         <Documents person={record.id} />
@@ -397,7 +397,7 @@ export function ModulePage() {
                                         <ChildSection
                                             entity="accounts"
                                             parent={parent}
-                                            title="Bank accounts"
+                                            title="Bank Accounts"
                                         />
                                     ) : tab === "associations" ? (
                                         <Associations person={record.id} />

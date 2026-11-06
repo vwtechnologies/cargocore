@@ -66,6 +66,8 @@ export function CompaniesPage() {
     const cache = useQueryClient();
 
     const [search, setSearch] = useState("");
+    const [subSearch, setSubSearch] = useState("");
+    const subSearchTerm = useDebounced(subSearch);
     const debouncedSearch = useDebounced(search);
     const [page, setPage] = useState(1);
 
@@ -252,10 +254,10 @@ export function CompaniesPage() {
 
     // Fetch sub-companies for selected company
     const subCompaniesQuery = useQuery({
-        queryKey: ["sub-companies", selectedCompanyId],
+        queryKey: ["sub-companies", selectedCompanyId, subSearchTerm],
         queryFn: () =>
             managementApi<PageResult>(
-                `/api/v1/companies/${selectedCompanyId}/sub-companies?per_page=50`,
+                `/api/v1/companies/${selectedCompanyId}/sub-companies?${params({ per_page: 50, search: subSearchTerm })}`,
             ),
         enabled: !!selectedCompanyId,
     });
@@ -1152,7 +1154,7 @@ export function CompaniesPage() {
                                     !companyCapabilities.create || isSaving
                                 }
                                 aria-keyshortcuts="Control+n Meta+n"
-                                title="New record (Ctrl/Cmd+N)"
+                                title="New Record (Ctrl/Cmd+N)"
                             >
                                 <Plus size={16} />
                                 <span>New</span>
@@ -1168,7 +1170,7 @@ export function CompaniesPage() {
                                     isSaving
                                 }
                                 aria-keyshortcuts="Control+e Meta+e"
-                                title="Edit selected record (Ctrl/Cmd+E)"
+                                title="Edit Selected Record (Ctrl/Cmd+E)"
                             >
                                 <Pencil size={15} />
                                 <span>Edit</span>
@@ -1211,7 +1213,7 @@ export function CompaniesPage() {
                                 setViewAllSearch("");
                                 setHighlightedIndex(0);
                             }}
-                            title="View all companies in full table popup"
+                            title="View All Companies In Full Table Popup"
                             aria-label="View all companies"
                         >
                             <Maximize2 size={13} />
@@ -1244,9 +1246,9 @@ export function CompaniesPage() {
                             <thead>
                                 <tr>
                                     <th className="company-code-heading">
-                                        CODE
+                                        Code
                                     </th>
-                                    <th>COMPANY NAME</th>
+                                    <th>Company Name</th>
                                     <th
                                         className="master-status-cell"
                                         aria-label="Status"
@@ -1353,7 +1355,7 @@ export function CompaniesPage() {
                             <button
                                 disabled={page <= 1}
                                 onClick={() => setPage(1)}
-                                title="First page"
+                                title="First Page"
                             >
                                 <ChevronsLeft size={15} />
                             </button>
@@ -1362,7 +1364,7 @@ export function CompaniesPage() {
                                 onClick={() =>
                                     setPage((p) => Math.max(1, p - 1))
                                 }
-                                title="Previous page"
+                                title="Previous Page"
                             >
                                 <ChevronLeft size={15} />
                             </button>
@@ -1372,7 +1374,7 @@ export function CompaniesPage() {
                                     page >= companiesQuery.data.meta.last_page
                                 }
                                 onClick={() => setPage((p) => p + 1)}
-                                title="Next page"
+                                title="Next Page"
                             >
                                 <ChevronRight size={15} />
                             </button>
@@ -1387,7 +1389,7 @@ export function CompaniesPage() {
                                             1,
                                     )
                                 }
-                                title="Last page"
+                                title="Last Page"
                             >
                                 <ChevronsRight size={15} />
                             </button>
@@ -1496,14 +1498,14 @@ export function CompaniesPage() {
                                                     className="company-section-icon"
                                                 />
                                                 <h4 className="company-section-eyebrow">
-                                                    GENERAL
+                                                    General
                                                 </h4>
                                             </div>
                                         </div>
                                         <div className="company-fields-grid company-general-grid">
                                             <div className="company-field company-field-code">
                                                 <label htmlFor="company-code">
-                                                    COMPANY CODE{" "}
+                                                    Company Code{" "}
                                                     <span className="req-star">
                                                         *
                                                     </span>
@@ -1539,7 +1541,7 @@ export function CompaniesPage() {
 
                                             <div className="company-field company-field-name">
                                                 <label htmlFor="company-name">
-                                                    COMPANY NAME{" "}
+                                                    Company Name{" "}
                                                     <span className="req-star">
                                                         *
                                                     </span>
@@ -1573,11 +1575,11 @@ export function CompaniesPage() {
 
                                             <div className="company-field company-field-tax">
                                                 <label htmlFor="company-tax">
-                                                    NTN / TAX NO.
+                                                    NTN / Tax No.
                                                 </label>
                                                 <input
                                                     id="company-tax"
-                                                    aria-label="NTN / TAX NO."
+                                                    aria-label="NTN / Tax No."
                                                     type="text"
                                                     readOnly={
                                                         !isEditing &&
@@ -1606,7 +1608,7 @@ export function CompaniesPage() {
                                         <div className="company-default-controls">
                                             <div className="company-toggle-row">
                                                 <span className="company-toggle-label">
-                                                    ACTIVE
+                                                    Active
                                                 </span>
                                                 <div className="company-toggle-switch">
                                                     <button
@@ -1642,7 +1644,7 @@ export function CompaniesPage() {
                                             </div>
                                             <div className="company-toggle-row">
                                                 <span className="company-toggle-label">
-                                                    SET AS DEFAULT
+                                                    Set As Default
                                                 </span>
                                                 <div className="company-toggle-switch">
                                                     <button
@@ -1701,14 +1703,14 @@ export function CompaniesPage() {
                                                     className="company-section-icon"
                                                 />
                                                 <h4 className="company-section-eyebrow">
-                                                    CONTACT
+                                                    Contact
                                                 </h4>
                                             </div>
                                         </div>
                                         <div className="company-fields-grid company-contact-grid">
                                             <div className="company-field company-field-phone">
                                                 <label htmlFor="company-phone">
-                                                    PHONE
+                                                    Phone
                                                 </label>
                                                 <input
                                                     id="company-phone"
@@ -1739,7 +1741,7 @@ export function CompaniesPage() {
 
                                             <div className="company-field company-field-email">
                                                 <label htmlFor="company-email">
-                                                    EMAIL
+                                                    Email
                                                 </label>
                                                 <input
                                                     id="company-email"
@@ -1769,7 +1771,7 @@ export function CompaniesPage() {
                                             </div>
 
                                             <div className="company-field company-field-country">
-                                                <label>COUNTRY</label>
+                                                <label>Country</label>
                                                 <SearchableSelect
                                                     ariaLabel="Country"
                                                     placeholder="Select Country"
@@ -1790,7 +1792,7 @@ export function CompaniesPage() {
                                             </div>
 
                                             <div className="company-field company-field-city">
-                                                <label>CITY</label>
+                                                <label>City</label>
                                                 <SearchableSelect
                                                     ariaLabel="City"
                                                     placeholder="Select City"
@@ -1809,7 +1811,7 @@ export function CompaniesPage() {
 
                                             <div className="company-field company-field-address col-span-2">
                                                 <label htmlFor="company-address">
-                                                    ADDRESS
+                                                    Address
                                                 </label>
                                                 <textarea
                                                     id="company-address"
@@ -1851,7 +1853,7 @@ export function CompaniesPage() {
                                     <div className="company-card-header">
                                         <div className="company-card-header-left">
                                             <h3 className="company-card-title">
-                                                Sub-companies
+                                                Sub-Companies
                                             </h3>
                                         </div>
 
@@ -1862,25 +1864,44 @@ export function CompaniesPage() {
                                             onClick={handleAddSubClick}
                                         >
                                             <Plus size={15} />
-                                            <span>Add</span>
+                                            <span>Add Row</span>
                                         </button>
                                     </div>
 
                                     <div className="company-card-body subcompany-card-body">
+                                        <div className="table-toolbar">
+                                            <div className="search-input">
+                                                <Search size={16} />
+                                                <input
+                                                    aria-label="Search Sub-Companies"
+                                                    placeholder="Search sub-companies…"
+                                                    value={subSearch}
+                                                    disabled={
+                                                        isAddingSub ||
+                                                        editingSubId !== null
+                                                    }
+                                                    onChange={(event) =>
+                                                        setSubSearch(
+                                                            event.target.value,
+                                                        )
+                                                    }
+                                                />
+                                            </div>
+                                        </div>
                                         <div className="subcompany-table-container">
                                             <table className="subcompany-table">
                                                 <thead>
                                                     <tr>
                                                         {(
                                                             [
-                                                                ["CODE", "15%"],
-                                                                ["NAME", "25%"],
+                                                                ["Code", "15%"],
+                                                                ["Name", "25%"],
                                                                 [
-                                                                    "ADDRESS",
+                                                                    "Address",
                                                                     "30%",
                                                                 ],
                                                                 [
-                                                                    "PHONE",
+                                                                    "Phone",
                                                                     "18%",
                                                                 ],
                                                             ] as const
@@ -2082,7 +2103,7 @@ export function CompaniesPage() {
                                                                     type="button"
                                                                     className="btn-subcompany-save-pill"
                                                                     aria-label="Save changes"
-                                                                    title="Save record"
+                                                                    title="Save Record"
                                                                     onClick={
                                                                         handleSaveNewSub
                                                                     }
@@ -2321,7 +2342,7 @@ export function CompaniesPage() {
                                                                                     {showUnsavedBadge && (
                                                                                         <span
                                                                                             className="subcompany-unsaved-badge"
-                                                                                            title="Unsaved changes"
+                                                                                            title="Unsaved Changes"
                                                                                         >
                                                                                             Unsaved
                                                                                         </span>
@@ -2410,7 +2431,7 @@ export function CompaniesPage() {
                                                                                     type="button"
                                                                                     className="btn-subcompany-save-pill"
                                                                                     aria-label="Save changes"
-                                                                                    title="Save record"
+                                                                                    title="Save Record"
                                                                                     onClick={() =>
                                                                                         handleSaveExistingSub(
                                                                                             editingSubData,
@@ -2471,7 +2492,7 @@ export function CompaniesPage() {
                                                                                 sub,
                                                                             )
                                                                         }
-                                                                        title="Click to edit sub-company"
+                                                                        title="Click To Edit Sub-Company"
                                                                     >
                                                                         <td className="code-cell">
                                                                             {codeVal ||
@@ -2495,7 +2516,7 @@ export function CompaniesPage() {
                                                                                 {showUnsavedBadge && (
                                                                                     <span
                                                                                         className="subcompany-unsaved-badge"
-                                                                                        title="Unsaved changes"
+                                                                                        title="Unsaved Changes"
                                                                                     >
                                                                                         Unsaved
                                                                                     </span>
@@ -2538,7 +2559,7 @@ export function CompaniesPage() {
                                                                             <button
                                                                                 type="button"
                                                                                 className="icon-action-btn edit"
-                                                                                title="Edit sub-company"
+                                                                                title="Edit Sub-Company"
                                                                                 aria-label={`Edit ${nameVal}`}
                                                                                 onClick={(
                                                                                     e,
@@ -2558,7 +2579,7 @@ export function CompaniesPage() {
                                                                             <button
                                                                                 type="button"
                                                                                 className="icon-action-btn delete"
-                                                                                title="Delete sub-company"
+                                                                                title="Delete Sub-Company"
                                                                                 aria-label={`Delete ${nameVal}`}
                                                                                 onClick={(
                                                                                     e,
@@ -2614,7 +2635,7 @@ export function CompaniesPage() {
                                     marginBottom: "8px",
                                 }}
                             >
-                                Select a company
+                                Select A Company
                             </h3>
                             <p
                                 style={{
@@ -2636,7 +2657,7 @@ export function CompaniesPage() {
                                     !companyCapabilities.create || isSaving
                                 }
                                 aria-keyshortcuts="Control+n Meta+n"
-                                title="New record (Ctrl/Cmd+N)"
+                                title="New Record (Ctrl/Cmd+N)"
                             >
                                 <Plus size={16} />
                                 <span>Create Company</span>
@@ -2649,7 +2670,7 @@ export function CompaniesPage() {
             {/* Confirm: Delete Company */}
             <Confirm
                 open={deletingCompany}
-                title="Delete this company?"
+                title="Delete This Company?"
                 description={`Are you sure you want to delete ${selectedCompany?.name}? This action cannot be undone.`}
                 busy={deleteCompanyMutation.isPending}
                 onClose={() => setDeletingCompany(false)}
@@ -2703,7 +2724,7 @@ export function CompaniesPage() {
             {/* Confirm: Delete Sub-Company */}
             <Confirm
                 open={!!deletingSub}
-                title="Delete sub-company?"
+                title="Delete Sub-Company?"
                 description={`Are you sure you want to delete ${deletingSub?.name}?`}
                 busy={deleteSubMutation.isPending}
                 onClose={() => setDeletingSub(null)}
@@ -2774,13 +2795,13 @@ export function CompaniesPage() {
                             <table className="view-all-table">
                                 <thead>
                                     <tr>
-                                        <th>CODE</th>
-                                        <th>COMPANY NAME</th>
-                                        <th>NTN / TAX NO.</th>
-                                        <th>PHONE</th>
-                                        <th>EMAIL / WEBSITE</th>
-                                        <th>ADDRESS</th>
-                                        <th>STATUS</th>
+                                        <th>Code</th>
+                                        <th>Company Name</th>
+                                        <th>NTN / Tax No.</th>
+                                        <th>Phone</th>
+                                        <th>Email / Website</th>
+                                        <th>Address</th>
+                                        <th>Status</th>
                                     </tr>
                                 </thead>
                                 <tbody>

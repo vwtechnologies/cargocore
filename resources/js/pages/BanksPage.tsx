@@ -1,3 +1,4 @@
+import { titleCaseLabel } from "../lib/labels";
 import {
     useEffect,
     useMemo,
@@ -410,14 +411,14 @@ export function BanksPage() {
     const columns: MasterColumn<RecordData>[] = [
         {
             key: "short_name",
-            label: "S. NAME",
+            label: "S. Name",
             width: "84px",
             className: "bank-short-name-cell",
             render: (record) => String(record.short_name || "—"),
         },
         {
             key: "name",
-            label: "BANK NAME",
+            label: "Bank Name",
             render: (record) => (
                 <button
                     type="button"
@@ -434,10 +435,10 @@ export function BanksPage() {
         },
     ];
     const directoryColumns: ViewAllColumn<RecordData>[] = [
-        { key: "name", label: "BANK NAME" },
-        { key: "short_name", label: "S. NAME" },
-        { key: "country_name", label: "COUNTRY" },
-        { key: "status", label: "STATUS" },
+        { key: "name", label: "Bank Name" },
+        { key: "short_name", label: "S. Name" },
+        { key: "country_name", label: "Country" },
+        { key: "status", label: "Status" },
     ];
     const locked = !!bankEditor || bank?.status === false;
     const branchPagination = branchesQuery.data?.meta;
@@ -452,7 +453,7 @@ export function BanksPage() {
     ): DetailColumn<T> {
         return {
             key,
-            label: label.toUpperCase(),
+            label: titleCaseLabel(label),
             width,
             render: (_record, value) => String(value[key] || "—"),
             editor: (value, change) => (
@@ -481,7 +482,7 @@ export function BanksPage() {
         textColumn("name", "Branch Name", "190px", "text", true),
         {
             key: "city_id",
-            label: "CITY",
+            label: "City",
             width: "160px",
             render: (record, value) =>
                 value.city_id === record.city_id ? (
@@ -515,12 +516,12 @@ export function BanksPage() {
         textColumn("address", "Branch Address", "170px"),
         {
             key: "status",
-            label: "STATUS",
+            label: "Status",
             width: "100px",
             render: (_record, value) => <Badge active={value.status} />,
             editor: (value, change) => (
                 <InlineStatus
-                    label="Branch status"
+                    label="Branch Status"
                     value={value.status}
                     onChange={(status) => change("status", status)}
                 />
@@ -530,7 +531,7 @@ export function BanksPage() {
     const officerColumns: DetailColumn<OfficerValues>[] = [
         {
             key: "person_id",
-            label: "OFFICER NAME",
+            label: "Officer Name",
             width: "230px",
             render: (record, value) =>
                 value.new_person ? (
@@ -596,7 +597,7 @@ export function BanksPage() {
         },
         {
             key: "bank_branch_id",
-            label: "BRANCH",
+            label: "Branch",
             width: "170px",
             render: (record, value) =>
                 !value.bank_branch_id ? (
@@ -630,12 +631,12 @@ export function BanksPage() {
         textColumn("email", "Officer Email Address", "210px", "email"),
         {
             key: "status",
-            label: "STATUS",
+            label: "Status",
             width: "100px",
             render: (_record, value) => <Badge active={value.status} />,
             editor: (value, change) => (
                 <InlineStatus
-                    label="Officer status"
+                    label="Officer Status"
                     value={value.status}
                     onChange={(status) => change("status", status)}
                 />
@@ -667,7 +668,7 @@ export function BanksPage() {
                     bank && setDeleting({ entity: "banks", record: bank })
                 }
                 newAriaLabel={id ? "New bank" : "Add record"}
-                listHeading="BANKS"
+                listHeading="Banks"
                 items={banks}
                 columns={columns}
                 selectedId={creating ? null : (selectedId ?? null)}
@@ -830,7 +831,7 @@ export function BanksPage() {
                                         />
                                     </Field>
                                     <Status
-                                        label="Bank status"
+                                        label="Bank Status"
                                         value={values.status}
                                         disabled={!bankEditor}
                                         onChange={(value) =>

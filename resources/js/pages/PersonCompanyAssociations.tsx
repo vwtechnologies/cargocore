@@ -54,6 +54,7 @@ export function PersonCompanyAssociations({
     const busy = useIsMutating() > 0;
     const [company, setCompany] = useState(session.companies[0]?.id);
     const [search, setSearch] = useState("");
+    const [roleSearch, setRoleSearch] = useState("");
     const [loadedCompany, setLoadedCompany] = useState<number>();
     const [snapshot, setSnapshot] = useState<RoleResponse>();
     const [draft, setDraft] = useState<Record<number, Assignment>>({});
@@ -284,7 +285,7 @@ export function PersonCompanyAssociations({
                     <div className="company-card-header">
                         <div>
                             <span className="person-company-caption">
-                                COMPANY NAME
+                                Company Name
                             </span>
                             <h3 className="company-card-title">
                                 {selectedCompany?.name ?? "Select a company"}
@@ -305,53 +306,117 @@ export function PersonCompanyAssociations({
                         </div>
                     ) : (
                         <>
+                            <div className="table-toolbar">
+                                <div className="search-input">
+                                    <Search size={16} />
+                                    <input
+                                        aria-label="Search Business Roles"
+                                        placeholder="Search business roles…"
+                                        value={roleSearch}
+                                        onChange={(event) =>
+                                            setRoleSearch(event.target.value)
+                                        }
+                                    />
+                                </div>
+                            </div>
                             <div className="person-role-scroll">
                                 <table className="person-role-table">
                                     <thead>
                                         <tr>
-                                            <th>BUSINESS ROLE</th>
-                                            <th>OPENING AMOUNT (PKR)</th>
+                                            <th>Business Role</th>
+                                            <th>Opening Amount (PKR)</th>
                                             <th />
                                         </tr>
                                     </thead>
                                     <tbody>
-                                        {roleOptions.map((role) => {
-                                            const value = draft[role.id] ?? {
-                                                selected: false,
-                                                amount: "",
-                                            };
-                                            const existing =
-                                                snapshot?.classifications.find(
-                                                    (item) =>
-                                                        Number(
-                                                            item.business_type_id,
-                                                        ) === role.id,
-                                                );
-                                            const writable =
-                                                canEdit &&
-                                                (existing
-                                                    ? capabilities.update
-                                                    : capabilities.create) &&
-                                                !save.isPending &&
-                                                !reload.isPending;
-                                            return (
-                                                <tr
-                                                    key={role.id}
-                                                    className={
-                                                        value.selected
-                                                            ? "role-assigned"
-                                                            : ""
-                                                    }
-                                                >
-                                                    <td>
-                                                        <label>
+                                        {roleOptions
+                                            .filter((role) =>
+                                                String(role.name)
+                                                    .toLowerCase()
+                                                    .includes(
+                                                        roleSearch.toLowerCase(),
+                                                    ),
+                                            )
+                                            .map((role) => {
+                                                const value = draft[
+                                                    role.id
+                                                ] ?? {
+                                                    selected: false,
+                                                    amount: "",
+                                                };
+                                                const existing =
+                                                    snapshot?.classifications.find(
+                                                        (item) =>
+                                                            Number(
+                                                                item.business_type_id,
+                                                            ) === role.id,
+                                                    );
+                                                const writable =
+                                                    canEdit &&
+                                                    (existing
+                                                        ? capabilities.update
+                                                        : capabilities.create) &&
+                                                    !save.isPending &&
+                                                    !reload.isPending;
+                                                return (
+                                                    <tr
+                                                        key={role.id}
+                                                        className={
+                                                            value.selected
+                                                                ? "role-assigned"
+                                                                : ""
+                                                        }
+                                                    >
+                                                        <td>
+                                                            <label>
+                                                                <input
+                                                                    type="checkbox"
+                                                                    aria-label={`Assign ${role.name}`}
+                                                                    checked={
+                                                                        value.selected
+                                                                    }
+                                                                    disabled={
+                                                                        !writable
+                                                                    }
+                                                                    onChange={(
+                                                                        event,
+                                                                    ) => {
+                                                                        onEditingChange(
+                                                                            true,
+                                                                        );
+                                                                        setDraft(
+                                                                            (
+                                                                                current,
+                                                                            ) => ({
+                                                                                ...current,
+                                                                                [role.id]:
+                                                                                    {
+                                                                                        ...value,
+                                                                                        selected:
+                                                                                            event
+                                                                                                .target
+                                                                                                .checked,
+                                                                                    },
+                                                                            }),
+                                                                        );
+                                                                    }}
+                                                                />
+                                                                <span>
+                                                                    {role.name}
+                                                                </span>
+                                                            </label>
+                                                        </td>
+                                                        <td>
                                                             <input
-                                                                type="checkbox"
-                                                                aria-label={`Assign ${role.name}`}
-                                                                checked={
-                                                                    value.selected
+                                                                aria-label={`Opening amount for ${role.name}`}
+                                                                type="text"
+                                                                inputMode="decimal"
+                                                                pattern="-?[0-9]{1,17}(\.[0-9]{1,2})?"
+                                                                value={
+                                                                    value.amount
                                                                 }
                                                                 disabled={
+                                                                    !value.selected ||
                                                                     !writable
                                                                 }
                                                                 onChange={(
@@ -368,71 +433,36 @@ export function PersonCompanyAssociations({
                                                                             [role.id]:
                                                                                 {
                                                                                     ...value,
-                                                                                    selected:
-                                                                                        event
-                                                                                            .target
-                                                                                            .checked,
+                                                                                    amount: event
+                                                                                        .target
+                                                                                        .value,
                                                                                 },
                                                                         }),
                                                                     );
                                                                 }}
+                                                                placeholder="Optional"
                                                             />
-                                                            <span>
-                                                                {role.name}
-                                                            </span>
-                                                        </label>
-                                                    </td>
-                                                    <td>
-                                                        <input
-                                                            aria-label={`Opening amount for ${role.name}`}
-                                                            type="text"
-                                                            inputMode="decimal"
-                                                            pattern="-?[0-9]{1,17}(\.[0-9]{1,2})?"
-                                                            value={value.amount}
-                                                            disabled={
-                                                                !value.selected ||
-                                                                !writable
-                                                            }
-                                                            onChange={(
-                                                                event,
-                                                            ) => {
-                                                                onEditingChange(
-                                                                    true,
-                                                                );
-                                                                setDraft(
-                                                                    (
-                                                                        current,
-                                                                    ) => ({
-                                                                        ...current,
-                                                                        [role.id]:
-                                                                            {
-                                                                                ...value,
-                                                                                amount: event
-                                                                                    .target
-                                                                                    .value,
-                                                                            },
-                                                                    }),
-                                                                );
-                                                            }}
-                                                            placeholder="Optional"
-                                                        />
-                                                    </td>
-                                                    <td>
-                                                        <button
-                                                            type="button"
-                                                            className="text-button"
-                                                            aria-label={`View all ${role.name} for ${selectedCompany?.name}`}
-                                                            onClick={() =>
-                                                                setViewing(role)
-                                                            }
-                                                        >
-                                                            <Eye size={14} />
-                                                            View all
-                                                        </button>
-                                                    </td>
-                                                </tr>
-                                            );
-                                        })}
+                                                        </td>
+                                                        <td>
+                                                            <button
+                                                                type="button"
+                                                                className="text-button"
+                                                                aria-label={`View all ${role.name} for ${selectedCompany?.name}`}
+                                                                onClick={() =>
+                                                                    setViewing(
+                                                                        role,
+                                                                    )
+                                                                }
+                                                            >
+                                                                <Eye
+                                                                    size={14}
+                                                                />
+                                                                View all
+                                                            </button>
+                                                        </td>
+                                                    </tr>
+                                                );
+                                            })}
                                     </tbody>
                                 </table>
                             </div>
@@ -527,8 +557,8 @@ function RolePeople({ company, role }: { company: number; role: number }) {
                         <table>
                             <thead>
                                 <tr>
-                                    <th>PERSON</th>
-                                    <th>CODE</th>
+                                    <th>Person</th>
+                                    <th>Code</th>
                                     <th>CNIC</th>
                                 </tr>
                             </thead>

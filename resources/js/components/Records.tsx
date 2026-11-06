@@ -1,3 +1,4 @@
+import { titleCaseLabel } from "../lib/labels";
 import { useEffect, useMemo, useState, useRef } from "react";
 import { useSearchParams } from "react-router-dom";
 import {
@@ -131,7 +132,7 @@ export function RecordStatusAction({
             aria-label={`${action} ${recordLabel(record)}`}
             aria-pressed={record.status}
             title={`${record.status ? "Active" : "Inactive"} · ${action}`}
-            style={{ color: record.status ? "#147d64" : "#a33d35" }}
+            style={{ color: record.status ? "#3e6957" : "#a33d35" }}
             disabled={mutation.isPending}
             onClick={(event) => {
                 event.stopPropagation();
@@ -224,8 +225,9 @@ export function RecordGrid({
         () =>
             keys.map((key) => ({
                 accessorKey: key,
-                header:
+                header: titleCaseLabel(
                     definition.fields[key]?.label ?? extraLabels[key] ?? key,
+                ),
                 cell: ({ row }) =>
                     key === "status" ? (
                         <Badge active={row.original.status} />
@@ -641,7 +643,7 @@ export function RecordDetails({
                             {!editing && definition.capabilities.delete && (
                                 <button
                                     className="icon-button delete-button"
-                                    title="Delete record"
+                                    title="Delete Record"
                                     aria-label="Delete record"
                                     onClick={() => setDeleting(true)}
                                 >
@@ -676,7 +678,7 @@ export function RecordDetails({
                                             : ""
                                     }
                                 >
-                                    <dt>{field.label}</dt>
+                                    <dt>{titleCaseLabel(field.label)}</dt>
                                     <dd>
                                         {field.type === "reference"
                                             ? display(
@@ -733,7 +735,7 @@ export function RecordDetails({
             </section>
             <Confirm
                 open={deleting}
-                title="Delete this record?"
+                title="Delete This Record?"
                 description="Deletion is allowed only when no dependent records reference this record. Deactivate referenced records instead."
                 busy={remove.isPending}
                 onClose={() => setDeleting(false)}

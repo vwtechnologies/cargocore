@@ -28,13 +28,13 @@ export function AuditPage() {
     return (
         <>
             <SectionHeader
-                eyebrow="ADMINISTRATION"
-                title="Audit history"
+                eyebrow="Administration"
+                title="Audit History"
                 description="A traceable history of important changes and security events."
             />
             <section className="panel">
                 <PanelTitle
-                    title="Activity log"
+                    title="Activity Log"
                     subtitle="Sensitive values are redacted. Audit records cannot be edited."
                 />
                 <div className="table-toolbar">
@@ -56,16 +56,16 @@ export function AuditPage() {
                 ) : query.error ? (
                     <ErrorState error={query.error} />
                 ) : !query.data?.data.length ? (
-                    <Empty title="No activity found" />
+                    <Empty title="No Activity Found" />
                 ) : (
                     <div className="table-scroll">
                         <table>
                             <thead>
                                 <tr>
-                                    <th>Date & time (PKT)</th>
+                                    <th>Date & Time (Pkt)</th>
                                     <th>Action</th>
-                                    <th>Module / record</th>
-                                    <th>Changed by</th>
+                                    <th>Module / Record</th>
+                                    <th>Changed By</th>
                                     <th />
                                 </tr>
                             </thead>
@@ -136,7 +136,7 @@ export function AuditPage() {
             <Modal
                 open={!!selected}
                 onClose={() => setSelected(undefined)}
-                title="Change details"
+                title="Change Details"
                 description={
                     selected
                         ? `${selected.entity} · ${dateTime(selected.created_at)}`
@@ -151,7 +151,7 @@ export function AuditPage() {
                             <dd>{display(selected?.action)}</dd>
                         </div>
                         <div>
-                            <dt>Source IP</dt>
+                            <dt>Source Ip</dt>
                             <dd>{display(selected?.ip_address)}</dd>
                         </div>
                     </dl>

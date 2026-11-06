@@ -1,3 +1,4 @@
+import { titleCaseLabel } from "../lib/labels";
 import { useEffect, useRef, useState } from "react";
 import { useLocation, useNavigate, useParams } from "react-router-dom";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
@@ -234,7 +235,7 @@ export function BusinessTypesPage() {
             columns={[
                 {
                     key: "name",
-                    label: "BUSINESS ROLE",
+                    label: "Business Role",
                 },
             ]}
             selectedId={mode === "create" ? null : (snapshot?.id ?? null)}
@@ -256,7 +257,7 @@ export function BusinessTypesPage() {
             viewAllColumns={[
                 {
                     key: "name",
-                    label: "BUSINESS ROLE",
+                    label: "Business Role",
                 },
             ]}
             onSelectFromViewAll={select}
@@ -311,7 +312,7 @@ export function BusinessTypesPage() {
                                 <div className="country-fields-grid employee-type-fields">
                                     <div className="company-field">
                                         <label htmlFor="business-type-name">
-                                            {singular.toUpperCase()}{" "}
+                                            {titleCaseLabel(singular)}{" "}
                                             <span className="required-star">
                                                 *
                                             </span>
@@ -351,7 +352,7 @@ export function BusinessTypesPage() {
                                     </div>
                                     <div className="company-toggle-row">
                                         <span className="company-toggle-label">
-                                            STATUS
+                                            Status
                                         </span>
                                         <div className="company-toggle-switch">
                                             <button
@@ -407,7 +408,7 @@ export function BusinessTypesPage() {
             <Modal
                 open={!!pendingNavigation}
                 onClose={() => setPendingNavigation(null)}
-                title="Unsaved changes"
+                title="Unsaved Changes"
                 description="Save or discard your changes before continuing."
             >
                 <div className="modal-actions">

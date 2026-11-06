@@ -1,3 +1,4 @@
+import { titleCaseLabel } from "../lib/labels";
 import { useEffect, useRef, useState } from "react";
 import { useLocation, useNavigate, useParams } from "react-router-dom";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
@@ -17,8 +18,8 @@ const values = (record?: RecordData): Values => ({
     status: record?.status !== false,
 });
 const columns = [
-    { key: "code", label: "MARKA CODE" },
-    { key: "description", label: "MARKA DESCRIPTION" },
+    { key: "code", label: "Marka Code" },
+    { key: "description", label: "Marka Description" },
 ];
 
 export function MarkasPage() {
@@ -217,7 +218,7 @@ export function MarkasPage() {
             onCancel={cancel}
             onDelete={() => attempt(() => setDeleting(true))}
             newAriaLabel="New Marka"
-            listHeading="MARKA"
+            listHeading="Marka"
             items={list.data?.data ?? []}
             columns={[
                 {
@@ -307,7 +308,7 @@ export function MarkasPage() {
                                                 key={key}
                                             >
                                                 <label htmlFor={`marka-${key}`}>
-                                                    MARKA {key.toUpperCase()}{" "}
+                                                    Marka {titleCaseLabel(key)}{" "}
                                                     <span className="required-star">
                                                         *
                                                     </span>
@@ -358,7 +359,7 @@ export function MarkasPage() {
                                     )}
                                     <div className="company-toggle-row">
                                         <span className="company-toggle-label">
-                                            STATUS
+                                            Status
                                         </span>
                                         <div className="company-toggle-switch">
                                             <button
@@ -411,7 +412,7 @@ export function MarkasPage() {
             <Modal
                 open={!!pendingAction}
                 onClose={() => setPendingAction(null)}
-                title="Unsaved changes"
+                title="Unsaved Changes"
                 description="Save or discard your changes before continuing."
             >
                 <div className="modal-actions">

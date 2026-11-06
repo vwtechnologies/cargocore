@@ -69,7 +69,7 @@ it("lets a view-only user select and navigate linked rows without exposing editi
         screen.queryByRole("button", { name: "Save changes" }),
     ).not.toBeInTheDocument();
     expect(
-        screen.getByRole("button", { name: "Add branch: BRANCH NAME" }),
+        screen.getByRole("button", { name: "Add branch: Branch Name" }),
     ).toBeDisabled();
     client.clear();
 });

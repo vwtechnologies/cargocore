@@ -1,3 +1,4 @@
+import { titleCaseLabel } from "../lib/labels";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { Controller, useForm } from "react-hook-form";
 import { formSchema } from "../lib/validation";
@@ -8,8 +9,9 @@ import { Check, History, Plus, Trash2, X } from "./icons";
 import { useDirtyForm, useDirty } from "../lib/dirty";
 import { useSession } from "../lib/session";
 import { api, managementApi, endpoint } from "../lib/api";
-import { ApiError, type RecordData } from "../lib/types";
+import { ApiError, type Field, type RecordData } from "../lib/types";
 import { ReferenceSelect } from "./ReferenceSelect";
+import { RepeatableValues } from "./RepeatableValues";
 import { ErrorState, Spinner, Modal } from "./ui";
 import { useRecordShortcuts } from "../lib/record-shortcuts";
 export type Parent = { entity: string; id: number };
@@ -68,6 +70,34 @@ export function RecordForm({
         resolver: zodResolver(schema),
     });
     const values = watch();
+    const entries = Object.entries(definition.fields);
+    const contactField = (key: string) =>
+        /address|phone|mobile|email|website|contact/.test(key);
+    const fieldGroups: { title?: string; fields: [string, Field][] }[] =
+        entries.length > 8
+            ? [
+                  {
+                      title: "General",
+                      fields: entries.filter(
+                          ([key, field]) =>
+                              field.type !== "boolean" && !contactField(key),
+                      ),
+                  },
+                  {
+                      title: "Contact Details",
+                      fields: entries.filter(
+                          ([key, field]) =>
+                              field.type !== "boolean" && contactField(key),
+                      ),
+                  },
+                  {
+                      title: "Status",
+                      fields: entries.filter(
+                          ([, field]) => field.type === "boolean",
+                      ),
+                  },
+              ].filter((group) => group.fields.length > 0)
+            : [{ fields: entries }];
     useDirtyForm(isDirty);
     const guard = useDirty();
     useEffect(() => onDirty?.(isDirty), [isDirty, onDirty]);
@@ -161,6 +191,8 @@ export function RecordForm({
         setValue(key, value, { shouldDirty: true });
         if (key === "country_id") {
             setValue("city_id", null, { shouldDirty: true });
+            if (entity === "accounts" && "bank_id" in values)
+                setValue("bank_id", null, { shouldDirty: true });
             if ("bank_branch_id" in values)
                 setValue("bank_branch_id", null, { shouldDirty: true });
         }
@@ -177,235 +209,249 @@ export function RecordForm({
                 onKeyDown={handleEnterNav}
             >
                 <div className="form-grid">
-                    {Object.entries(definition.fields).map(([key, field]) => {
-                        const type = field.type ?? "text";
-                        const disabled = !!record && !!field.immutable;
-                        const inputId = `field-${entity}-${key}`;
-                        const filters: Record<string, unknown> = {};
-                        if (
-                            field.entity === "cities" ||
-                            (entity === "accounts" && field.entity === "banks")
-                        )
-                            filters.country_id = values.country_id;
-                        if (field.entity === "branches") {
-                            filters.bank_id =
-                                entity === "officers"
-                                    ? parent?.id
-                                    : values.bank_id;
-                            filters.city_id = values.city_id;
-                        }
-                        return (
-                            <div
-                                key={key}
-                                className={`field ${["textarea", "list"].includes(type) ? "span-two" : ""}`}
-                            >
-                                <label htmlFor={inputId}>
-                                    {field.label}
-                                    {field.required && (
-                                        <span
-                                            aria-hidden="true"
-                                            className="required"
+                    {fieldGroups.map((group, index) => (
+                        <section
+                            className="form-field-section"
+                            key={group.title ?? index}
+                        >
+                            {group.title && <h3>{group.title}</h3>}
+                            <div className="form-grid">
+                                {group.fields.map(([key, field]) => {
+                                    const type = field.type ?? "text";
+                                    const disabled =
+                                        !!record && !!field.immutable;
+                                    if (
+                                        (field.depends &&
+                                            !values[field.depends]) ||
+                                        (entity === "accounts" &&
+                                            field.entity === "banks" &&
+                                            !values.country_id) ||
+                                        (entity === "accounts" &&
+                                            field.entity === "branches" &&
+                                            !values.bank_id) ||
+                                        (entity === "people" &&
+                                            key === "joining_date" &&
+                                            !values.is_employee)
+                                    )
+                                        return null;
+                                    const inputId = `field-${entity}-${key}`;
+                                    const filters: Record<string, unknown> = {};
+                                    if (
+                                        field.entity === "cities" ||
+                                        (entity === "accounts" &&
+                                            field.entity === "banks")
+                                    )
+                                        filters.country_id = values.country_id;
+                                    if (field.entity === "branches") {
+                                        filters.bank_id =
+                                            entity === "officers"
+                                                ? parent?.id
+                                                : values.bank_id;
+                                        filters.city_id = values.city_id;
+                                    }
+                                    return (
+                                        <div
+                                            key={key}
+                                            className={`field ${["textarea", "list"].includes(type) ? "span-two" : ""}`}
                                         >
-                                            {" "}
-                                            *
-                                        </span>
-                                    )}
-                                </label>
-                                {type === "reference" ? (
-                                    <>
-                                        <Controller
-                                            control={control}
-                                            name={key}
-                                            render={({ field: f }) => (
-                                                <ReferenceSelect
-                                                    id={inputId}
-                                                    label={field.label}
-                                                    entity={field.entity!}
-                                                    value={f.value}
-                                                    filters={filters}
-                                                    disabled={
-                                                        !!field.depends &&
-                                                        !values[field.depends]
-                                                    }
-                                                    onChange={(v) =>
-                                                        changeReference(key, v)
-                                                    }
-                                                />
-                                            )}
-                                        />
-                                        {key === "person_id" &&
-                                            session.entities.people.capabilities
-                                                .create && (
-                                                <button
-                                                    type="button"
-                                                    className="text-button"
-                                                    onClick={() =>
-                                                        setPersonQuick(true)
-                                                    }
-                                                >
-                                                    <Plus size={12} />
-                                                    Create person
-                                                </button>
-                                            )}
-                                    </>
-                                ) : type === "boolean" ? (
-                                    <Controller
-                                        name={key}
-                                        control={control}
-                                        render={({ field: f }) => (
-                                            <label className="switch-row">
-                                                <input
-                                                    id={inputId}
-                                                    type="checkbox"
-                                                    checked={!!f.value}
-                                                    onChange={(e) =>
-                                                        f.onChange(
-                                                            e.target.checked,
-                                                        )
-                                                    }
-                                                />
-                                                <span className="switch" />
-                                                <span>
-                                                    {key === "status"
-                                                        ? f.value
-                                                            ? "Active"
-                                                            : "Inactive"
-                                                        : "Set as default"}
-                                                </span>
+                                            <label htmlFor={inputId}>
+                                                {titleCaseLabel(field.label)}
+                                                {field.required && (
+                                                    <span
+                                                        aria-hidden="true"
+                                                        className="required"
+                                                    >
+                                                        {" "}
+                                                        *
+                                                    </span>
+                                                )}
                                             </label>
-                                        )}
-                                    />
-                                ) : type === "list" ? (
-                                    <Controller
-                                        control={control}
-                                        name={key}
-                                        render={({ field: f }) => {
-                                            const items = (f.value ??
-                                                []) as string[];
-                                            return (
-                                                <div className="repeatable">
-                                                    {items.map((item, i) => (
-                                                        <div
-                                                            className="repeatable-row"
-                                                            key={i}
-                                                        >
-                                                            <input
-                                                                aria-label={`${field.label} ${i + 1}`}
-                                                                value={item}
-                                                                onChange={(e) =>
-                                                                    f.onChange(
-                                                                        items.map(
-                                                                            (
-                                                                                v,
-                                                                                j,
-                                                                            ) =>
-                                                                                i ===
-                                                                                j
-                                                                                    ? e
-                                                                                          .target
-                                                                                          .value
-                                                                                    : v,
-                                                                        ),
+                                            {type === "reference" ? (
+                                                <>
+                                                    <Controller
+                                                        control={control}
+                                                        name={key}
+                                                        render={({
+                                                            field: f,
+                                                        }) => (
+                                                            <ReferenceSelect
+                                                                id={inputId}
+                                                                label={titleCaseLabel(
+                                                                    field.label,
+                                                                )}
+                                                                entity={
+                                                                    field.entity!
+                                                                }
+                                                                value={f.value}
+                                                                filters={
+                                                                    filters
+                                                                }
+                                                                disabled={
+                                                                    !!field.depends &&
+                                                                    !values[
+                                                                        field
+                                                                            .depends
+                                                                    ]
+                                                                }
+                                                                onChange={(v) =>
+                                                                    changeReference(
+                                                                        key,
+                                                                        v,
                                                                     )
                                                                 }
                                                             />
+                                                        )}
+                                                    />
+                                                    {key === "person_id" &&
+                                                        session.entities.people
+                                                            .capabilities
+                                                            .create && (
                                                             <button
                                                                 type="button"
-                                                                className="icon-button"
-                                                                aria-label={`Remove ${field.label} ${i + 1}`}
+                                                                className="text-button"
                                                                 onClick={() =>
-                                                                    f.onChange(
-                                                                        items.filter(
-                                                                            (
-                                                                                _,
-                                                                                j,
-                                                                            ) =>
-                                                                                j !==
-                                                                                i,
-                                                                        ),
+                                                                    setPersonQuick(
+                                                                        true,
                                                                     )
                                                                 }
                                                             >
-                                                                <X size={16} />
+                                                                <Plus
+                                                                    size={12}
+                                                                />
+                                                                Create person
                                                             </button>
-                                                        </div>
-                                                    ))}
-                                                    <button
-                                                        type="button"
-                                                        className="text-button"
-                                                        onClick={() =>
-                                                            f.onChange([
-                                                                ...items,
-                                                                "",
-                                                            ])
-                                                        }
+                                                        )}
+                                                </>
+                                            ) : type === "boolean" ? (
+                                                <Controller
+                                                    name={key}
+                                                    control={control}
+                                                    render={({ field: f }) => (
+                                                        <label className="switch-row">
+                                                            <input
+                                                                id={inputId}
+                                                                type="checkbox"
+                                                                checked={
+                                                                    !!f.value
+                                                                }
+                                                                onChange={(e) =>
+                                                                    f.onChange(
+                                                                        e.target
+                                                                            .checked,
+                                                                    )
+                                                                }
+                                                            />
+                                                            <span className="switch" />
+                                                            <span>
+                                                                {key ===
+                                                                "status"
+                                                                    ? f.value
+                                                                        ? "Active"
+                                                                        : "Inactive"
+                                                                    : "Set as default"}
+                                                            </span>
+                                                        </label>
+                                                    )}
+                                                />
+                                            ) : type === "list" ? (
+                                                <Controller
+                                                    control={control}
+                                                    name={key}
+                                                    render={({ field: f }) => (
+                                                        <RepeatableValues
+                                                            label={titleCaseLabel(
+                                                                field.label,
+                                                            )}
+                                                            values={
+                                                                (f.value ??
+                                                                    []) as string[]
+                                                            }
+                                                            onChange={
+                                                                f.onChange
+                                                            }
+                                                        />
+                                                    )}
+                                                />
+                                            ) : type === "textarea" ? (
+                                                <textarea
+                                                    id={inputId}
+                                                    rows={3}
+                                                    {...register(key)}
+                                                    maxLength={field.max}
+                                                />
+                                            ) : type === "combobox" ? (
+                                                <>
+                                                    <input
+                                                        id={inputId}
+                                                        list={`options-${key}`}
+                                                        {...register(key)}
+                                                        maxLength={field.max}
+                                                    />
+                                                    <datalist
+                                                        id={`options-${key}`}
                                                     >
-                                                        <Plus size={14} />
-                                                        Add number
-                                                    </button>
-                                                </div>
-                                            );
-                                        }}
-                                    />
-                                ) : type === "textarea" ? (
-                                    <textarea
-                                        id={inputId}
-                                        rows={3}
-                                        {...register(key)}
-                                        maxLength={field.max}
-                                    />
-                                ) : type === "combobox" ? (
-                                    <>
-                                        <input
-                                            id={inputId}
-                                            list={`options-${key}`}
-                                            {...register(key)}
-                                            maxLength={field.max}
-                                        />
-                                        <datalist id={`options-${key}`}>
-                                            {field.options?.map((o) => (
-                                                <option key={o} value={o} />
-                                            ))}
-                                        </datalist>
-                                    </>
-                                ) : (
-                                    <input
-                                        id={inputId}
-                                        type={
-                                            type === "money"
-                                                ? "text"
-                                                : [
-                                                        "date",
-                                                        "number",
-                                                        "email",
-                                                        "url",
-                                                    ].includes(type)
-                                                  ? type
-                                                  : "text"
-                                        }
-                                        inputMode={
-                                            type === "money"
-                                                ? "decimal"
-                                                : undefined
-                                        }
-                                        step={type === "number" ? 1 : undefined}
-                                        min={field.min}
-                                        maxLength={
-                                            key === "cnic" ? 15 : field.max
-                                        }
-                                        disabled={disabled}
-                                        required={field.required}
-                                        {...register(key)}
-                                    />
-                                )}{" "}
-                                {errors[key] && (
-                                    <span className="field-error" role="alert">
-                                        {String(errors[key]?.message)}
-                                    </span>
-                                )}
+                                                        {field.options?.map(
+                                                            (o) => (
+                                                                <option
+                                                                    key={o}
+                                                                    value={o}
+                                                                />
+                                                            ),
+                                                        )}
+                                                    </datalist>
+                                                </>
+                                            ) : (
+                                                <input
+                                                    id={inputId}
+                                                    type={
+                                                        type === "money"
+                                                            ? "text"
+                                                            : [
+                                                                    "date",
+                                                                    "number",
+                                                                    "email",
+                                                                    "url",
+                                                                ].includes(type)
+                                                              ? type
+                                                              : "text"
+                                                    }
+                                                    inputMode={
+                                                        type === "money"
+                                                            ? "decimal"
+                                                            : undefined
+                                                    }
+                                                    step={
+                                                        type === "number"
+                                                            ? 1
+                                                            : undefined
+                                                    }
+                                                    min={field.min}
+                                                    maxLength={
+                                                        key === "cnic"
+                                                            ? 15
+                                                            : field.max
+                                                    }
+                                                    disabled={disabled}
+                                                    required={field.required}
+                                                    {...register(key)}
+                                                />
+                                            )}{" "}
+                                            {errors[key] && (
+                                                <span
+                                                    className="field-error"
+                                                    role="alert"
+                                                >
+                                                    {String(
+                                                        errors[key]?.message,
+                                                    )}
+                                                </span>
+                                            )}
+                                        </div>
+                                    );
+                                })}
                             </div>
-                        );
-                    })}
+                        </section>
+                    ))}
                 </div>
                 {mutation.error && <ErrorState error={mutation.error} />}
                 {record &&
@@ -490,7 +536,7 @@ export function RecordForm({
             <Modal
                 open={personQuick}
                 onClose={() => setPersonQuick(false)}
-                title="Create person"
+                title="Create Person"
                 wide
             >
                 <RecordForm
