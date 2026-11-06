@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Middleware\EnsureHttps;
 use App\Http\Middleware\SecureAccountSession;
 use Illuminate\Database\QueryException;
 use Illuminate\Foundation\Application;
@@ -14,6 +15,7 @@ return Application::configure(basePath: dirname(__DIR__))
     ->withMiddleware(function (Middleware $middleware): void {
         $middleware->statefulApi();
         $middleware->trustProxies(at: ['127.0.0.1', '::1'], headers: Request::HEADER_X_FORWARDED_FOR | Request::HEADER_X_FORWARDED_HOST | Request::HEADER_X_FORWARDED_PORT | Request::HEADER_X_FORWARDED_PROTO);
+        $middleware->append(EnsureHttps::class);
         $middleware->appendToGroup('web', SecureAccountSession::class);
         $middleware->redirectGuestsTo('/login');
     })
