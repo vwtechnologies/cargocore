@@ -46,7 +46,7 @@
     "src": "node_modules/@fontsource-variable/inter/files/inter-vietnamese-wght-normal.woff2"
   },
   "resources/js/app.tsx": {
-    "file": "assets/app-BKiH271h.js",
+    "file": "assets/app-C342EJee.js",
     "name": "app",
     "src": "resources/js/app.tsx",
     "isEntry": true,
@@ -56,7 +56,7 @@
       "_forms-B51h0RNY.js"
     ],
     "css": [
-      "assets/app-DiJcZX8C.css"
+      "assets/app-nnUsRqiH.css"
     ],
     "assets": [
       "assets/inter-cyrillic-ext-wght-normal-BOeWTOD4.woff2",

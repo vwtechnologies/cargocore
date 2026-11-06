@@ -193,6 +193,19 @@ export function Shell() {
         }))
         .filter((group) => group.items.length > 0);
 
+    const navigationPage = permittedGroups
+        .flatMap((group) => group.items)
+        .find((item) => item.path === `/${pagePath}`);
+    const entityPage = session.entities[pagePath];
+    const mobilePageTitle = navigationPage
+        ? pagePath === "users"
+            ? "User Management"
+            : navigationPage.label
+        : entityPage?.capabilities.view
+          ? entityPage.label
+          : undefined;
+    const MobilePageIcon = navigationPage?.icon ?? Database;
+
     const currentCompany = session.portal_companies.find(
         (c) => String(c.id) === String(company),
     );
@@ -216,6 +229,7 @@ export function Shell() {
     return (
         <div
             className="app-shell"
+            data-mobile-page-heading={mobilePageTitle ? "" : undefined}
             onInputCapture={uppercaseBusinessInput}
             onCompositionEndCapture={uppercaseBusinessInput}
         >
@@ -245,6 +259,18 @@ export function Shell() {
                             Cargo<span>Core</span>
                         </span>
                     </Link>
+
+                    {mobilePageTitle && (
+                        <div className="mobile-page-heading">
+                            <span
+                                className="topbar-brand-icon"
+                                aria-hidden="true"
+                            >
+                                <MobilePageIcon size={20} />
+                            </span>
+                            <h1>{mobilePageTitle}</h1>
+                        </div>
+                    )}
 
                     <nav className="topbar-nav">
                         <NavLink
