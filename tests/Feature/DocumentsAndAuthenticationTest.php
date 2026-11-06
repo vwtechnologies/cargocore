@@ -16,6 +16,27 @@ use Tests\ErpTestCase;
 
 class DocumentsAndAuthenticationTest extends ErpTestCase
 {
+    public function test_anonymous_sessions_can_refresh_csrf_tokens_without_disabling_login_protection(): void
+    {
+        $user = User::factory()->create(['password' => 'Assigned-password-123', 'role_id' => Role::factory()->create()->id]);
+        $this->app->instance('env', 'production');
+
+        $response = $this->getJson('/csrf-token')->assertOk();
+        $token = $response->json('token');
+        $this->assertIsString($token);
+        $this->assertNotEmpty($token);
+        $response->assertSessionHas('_token', $token);
+        $this->assertStringContainsString('no-store', $response->headers->get('Cache-Control'));
+        $this->assertGuest();
+
+        $credentials = ['username' => $user->username, 'password' => 'Assigned-password-123'];
+        $this->postJson('/login', $credentials, ['X-CSRF-TOKEN' => 'expired-token'])->assertStatus(419);
+        $this->assertGuest();
+        $token = $this->getJson('/csrf-token')->assertOk()->json('token');
+        $this->postJson('/login', $credentials, ['X-CSRF-TOKEN' => $token])->assertOk();
+        $this->assertAuthenticatedAs($user);
+    }
+
     public function test_private_uploads_are_reencoded_and_authorized_on_each_download(): void
     {
         Storage::fake('local');

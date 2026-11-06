@@ -1,32 +1,62 @@
 import { ApiError } from "./types";
 import { notifyRecordsChanged } from "./live-data";
+let csrfToken: string | undefined;
+
 export async function csrf() {
-    await fetch("/sanctum/csrf-cookie", {
+    const response = await fetch("/csrf-token", {
         credentials: "same-origin",
+        cache: "no-store",
         headers: { Accept: "application/json" },
     });
+    const body = await response.json().catch(() => null);
+    if (!response.ok || typeof body?.token !== "string" || !body.token) {
+        throw new ApiError(
+            body?.message ||
+                "Could not refresh your session. Please reload and try again.",
+            response.status,
+            body?.errors,
+            body?.code,
+        );
+    }
+    csrfToken = body.token;
 }
 export async function api<T>(
     path: string,
     options: RequestInit = {},
 ): Promise<T> {
-    const token = document.cookie
-        .split("; ")
-        .find((c) => c.startsWith("XSRF-TOKEN="))
-        ?.slice(11);
-    const headers: Record<string, string> = {
-        Accept: "application/json",
-        "X-Requested-With": "XMLHttpRequest",
-        ...(options.body instanceof FormData
-            ? {}
-            : { "Content-Type": "application/json" }),
-        ...(token ? { "X-XSRF-TOKEN": decodeURIComponent(token) } : {}),
-        ...(options.headers as Record<string, string>),
+    const send = () => {
+        const token = document.cookie
+            .split("; ")
+            .find((cookie) => cookie.startsWith("XSRF-TOKEN="))
+            ?.slice(11);
+        const headers = new Headers({
+            Accept: "application/json",
+            "X-Requested-With": "XMLHttpRequest",
+            ...(options.body instanceof FormData
+                ? {}
+                : { "Content-Type": "application/json" }),
+        });
+        new Headers(options.headers).forEach((value, name) =>
+            headers.set(name, value),
+        );
+        if (csrfToken) {
+            headers.set("X-CSRF-TOKEN", csrfToken);
+            headers.delete("X-XSRF-TOKEN");
+        } else if (token) {
+            headers.set("X-XSRF-TOKEN", decodeURIComponent(token));
+        }
+        return fetch(path, { ...options, credentials: "same-origin", headers });
     };
-    const response = await fetch(
-        path.startsWith("/api/") || !path.startsWith("/") ? path : path,
-        { ...options, credentials: "same-origin", headers },
-    );
+    let response = await send();
+    if (
+        response.status === 419 &&
+        ["POST", "PUT", "PATCH", "DELETE"].includes(
+            (options.method ?? "GET").toUpperCase(),
+        )
+    ) {
+        await csrf();
+        response = await send();
+    }
     const body =
         response.status === 204
             ? null

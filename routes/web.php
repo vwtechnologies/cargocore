@@ -8,8 +8,13 @@ use App\Http\Controllers\Api\PersonCompanyRoleController;
 use App\Http\Controllers\Api\RecordController;
 use App\Http\Controllers\Api\SessionController;
 use App\Http\Middleware\EnsureAccountReady;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
+
+Route::get('/csrf-token', fn (Request $request): JsonResponse => response()
+    ->json(['token' => $request->session()->token()])
+    ->header('Cache-Control', 'no-store, private'));
 
 Route::middleware('auth:sanctum')->get('/api/v1/session', [SessionController::class, 'show']);
 Route::middleware(['auth:sanctum', EnsureAccountReady::class])->prefix('api/v1')->group(function () {
