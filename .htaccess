@@ -1,0 +1,15 @@
+# Shared hosting fallback when the domain points at the Laravel project folder.
+# The preferred document root remains public/.
+Options -Indexes
+DirectoryIndex index.php
+
+RewriteEngine On
+
+# Only the public directory may be served directly.
+RewriteRule (^|/)\.(?!well-known(?:/|$)) - [F,L]
+RewriteRule ^(?:app|bootstrap|config|database|deploy|docs|resources|routes|storage|tests|vendor)(?:/|$) - [F,L,NC]
+RewriteRule ^(?:artisan|composer\.(?:json|lock)|package(?:-lock)?\.json|AGENTS\.md|CLAUDE\.md|.*\.(?:sql|zip|log))$ - [F,L,NC]
+
+# Let public/.htaccess handle assets and Laravel routes after the rewrite.
+RewriteRule ^public(?:/|$) - [L]
+RewriteRule ^(.*)$ public/$1 [L]
