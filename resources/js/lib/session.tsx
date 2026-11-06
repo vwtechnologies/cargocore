@@ -8,7 +8,7 @@ import {
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { api } from "./api";
 import { subscribeToRecordChanges } from "./live-data";
-import type { Session } from "./types";
+import { ApiError, type Session } from "./types";
 const Context = createContext<{
     session: Session;
     company: string;
@@ -35,10 +35,22 @@ export function SessionProvider({
     const [selectedCompany, setSelectedCompany] = useState("");
     const query = useQuery({
         queryKey: ["session"],
-        queryFn: () => api<Session>("/api/v1/session"),
+        queryFn: async () => {
+            try {
+                return await api<Session>("/api/v1/session");
+            } catch (error) {
+                if (error instanceof ApiError && error.status === 401)
+                    return null;
+                throw error;
+            }
+        },
         retry: false,
         staleTime: 60000,
+        refetchInterval: (query) => (query.state.data ? 15000 : false),
+        refetchOnWindowFocus: (query) => !!query.state.data,
+        refetchOnReconnect: (query) => !!query.state.data,
     });
+    const isAuthenticated = !!query.data;
     const portalCompanies = query.data?.portal_companies ?? [];
     const company = portalCompanies.some(
         (item) => String(item.id) === selectedCompany,
@@ -49,13 +61,16 @@ export function SessionProvider({
                   portalCompanies[0]?.id ??
                   "",
           );
-    useEffect(() => subscribeToRecordChanges(client), [client]);
+    useEffect(() => {
+        if (isAuthenticated) return subscribeToRecordChanges(client);
+    }, [client, isAuthenticated]);
     useEffect(() => {
         const reset = () => {
+            void client.cancelQueries({ queryKey: ["session"], exact: true });
+            client.setQueryData(["session"], null);
             client.removeQueries({
                 predicate: (query) => query.queryKey[0] !== "session",
             });
-            void client.resetQueries({ queryKey: ["session"], exact: true });
         };
         window.addEventListener("session-expired", reset);
         return () => window.removeEventListener("session-expired", reset);
