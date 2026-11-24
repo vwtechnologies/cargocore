@@ -5133,3 +5133,32 @@ input, textarea, select, .code { font-variant-numeric: tabular-nums; }
     outline: 2px solid var(--action);
     outline-offset: 2px;
 }
+
+/* Denser forms: up to three fields per row, stepping down to two or one as the form's container narrows (no breakpoints needed inside split layouts). */
+.form-grid,
+.company-profile-fields,
+.person-fields-grid,
+.marka-fields-grid {
+    --form-col-gap: 20px;
+    grid-template-columns: repeat(auto-fill, minmax(max(210px, calc((100% - 2 * var(--form-col-gap)) / 3)), 1fr));
+    gap: 14px var(--form-col-gap);
+}
+.form-field-section .form-grid { gap: 14px var(--form-col-gap); }
+.record-form { padding: 18px 22px; }
+.field { gap: 5px; }
+.form-field-section > h3 { padding-bottom: 8px; margin-bottom: 12px; }
+.form-field-section + .form-field-section { margin-top: 6px; }
+@media (max-width: 640px) {
+    .form-grid,
+    .company-profile-fields,
+    .person-fields-grid,
+    .marka-fields-grid { grid-template-columns: minmax(0, 1fr); }
+}
+/* Forms embedded in a card already get the card's padding. */
+.company-card-body > .record-form { padding: 0; }
+.toggle-only-section .form-grid { row-gap: 10px; }
+@media (max-width: 640px) {
+    .toggle-only-section .form-grid {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+}

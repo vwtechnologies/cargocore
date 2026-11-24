@@ -15,6 +15,13 @@ import { RepeatableValues } from "./RepeatableValues";
 import { ErrorState, Spinner, Modal } from "./ui";
 import { useRecordShortcuts } from "../lib/record-shortcuts";
 export type Parent = { entity: string; id: number };
+
+/** A section made only of category switches; each switch names itself, so the field label above it is skipped. */
+function isToggleOnlyGroup(fields: [string, Field][]): boolean {
+    return fields.every(
+        ([key, field]) => field.type === "boolean" && key !== "status",
+    );
+}
 export function RecordForm({
     entity,
     record,
@@ -125,36 +132,36 @@ export function RecordForm({
                             ]),
                         ]
                       : []),
-                  accountGroup("Opening Balance", [
+                  accountGroup("Opening Balance & Status", [
                       "opening_balance_date",
                       "opening_balance",
+                      "status",
                   ]),
-                  accountGroup("Status", ["status"]),
               ].filter((group) => group.fields.length > 0)
             : entries.length > 8
-            ? [
-                  {
-                      title: "General",
-                      fields: entries.filter(
-                          ([key, field]) =>
-                              field.type !== "boolean" && !contactField(key),
-                      ),
-                  },
-                  {
-                      title: "Contact Details",
-                      fields: entries.filter(
-                          ([key, field]) =>
-                              field.type !== "boolean" && contactField(key),
-                      ),
-                  },
-                  {
-                      title: "Status",
-                      fields: entries.filter(
-                          ([, field]) => field.type === "boolean",
-                      ),
-                  },
-              ].filter((group) => group.fields.length > 0)
-            : [{ fields: entries }];
+              ? [
+                    {
+                        title: "General",
+                        fields: entries.filter(
+                            ([key, field]) =>
+                                field.type !== "boolean" && !contactField(key),
+                        ),
+                    },
+                    {
+                        title: "Contact Details",
+                        fields: entries.filter(
+                            ([key, field]) =>
+                                field.type !== "boolean" && contactField(key),
+                        ),
+                    },
+                    {
+                        title: "Status",
+                        fields: entries.filter(
+                            ([, field]) => field.type === "boolean",
+                        ),
+                    },
+                ].filter((group) => group.fields.length > 0)
+              : [{ fields: entries }];
     useDirtyForm(isDirty);
     const guard = useDirty();
     useEffect(() => onDirty?.(isDirty), [isDirty, onDirty]);
@@ -271,7 +278,7 @@ export function RecordForm({
                 <div className="form-grid">
                     {fieldGroups.map((group, index) => (
                         <section
-                            className="form-field-section"
+                            className={`form-field-section${isToggleOnlyGroup(group.fields) ? " toggle-only-section" : ""}`}
                             key={group.title ?? index}
                         >
                             {group.title && <h3>{group.title}</h3>}
@@ -315,18 +322,24 @@ export function RecordForm({
                                             key={key}
                                             className={`field ${["textarea", "list"].includes(type) ? "span-two" : ""}`}
                                         >
-                                            <label htmlFor={inputId}>
-                                                {titleCaseLabel(field.label)}
-                                                {field.required && (
-                                                    <span
-                                                        aria-hidden="true"
-                                                        className="required"
-                                                    >
-                                                        {" "}
-                                                        *
-                                                    </span>
-                                                )}
-                                            </label>
+                                            {!isToggleOnlyGroup(
+                                                group.fields,
+                                            ) && (
+                                                <label htmlFor={inputId}>
+                                                    {titleCaseLabel(
+                                                        field.label,
+                                                    )}
+                                                    {field.required && (
+                                                        <span
+                                                            aria-hidden="true"
+                                                            className="required"
+                                                        >
+                                                            {" "}
+                                                            *
+                                                        </span>
+                                                    )}
+                                                </label>
+                                            )}
                                             {type === "reference" ? (
                                                 <>
                                                     <Controller
