@@ -5162,3 +5162,76 @@ input, textarea, select, .code { font-variant-numeric: tabular-nums; }
         grid-template-columns: repeat(2, minmax(0, 1fr));
     }
 }
+
+/* While a save runs: lock the page against repeat clicks and show progress. */
+body.is-saving {
+    cursor: progress;
+}
+body.is-saving > *:not(.saving-indicator) {
+    pointer-events: none;
+}
+body.is-saving .btn.primary,
+body.is-saving button[type="submit"] {
+    opacity: 0.7;
+}
+.saving-indicator {
+    position: fixed;
+    inset: 0 0 auto 0;
+    z-index: 10000;
+    pointer-events: none;
+    opacity: 0;
+    animation: saving-fade-in 0.15s ease-out 0.12s forwards;
+}
+.saving-bar {
+    display: block;
+    height: 3px;
+    background: linear-gradient(
+        90deg,
+        transparent 0%,
+        var(--brand-bright) 40%,
+        var(--brand) 60%,
+        transparent 100%
+    );
+    background-size: 50% 100%;
+    background-repeat: no-repeat;
+    animation: saving-slide 1.1s ease-in-out infinite;
+}
+.saving-badge {
+    position: absolute;
+    top: 12px;
+    left: 50%;
+    transform: translateX(-50%);
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 7px 14px;
+    border-radius: 999px;
+    background: var(--brand);
+    color: #fff;
+    font-size: 13px;
+    font-weight: 600;
+    box-shadow: 0 6px 18px rgb(0 0 0 / 0.18);
+}
+.saving-badge svg {
+    width: 15px;
+    height: 15px;
+}
+@keyframes saving-fade-in {
+    to {
+        opacity: 1;
+    }
+}
+@keyframes saving-slide {
+    from {
+        background-position: -50% 0;
+    }
+    to {
+        background-position: 150% 0;
+    }
+}
+@media (prefers-reduced-motion: reduce) {
+    .saving-bar {
+        animation: none;
+        background: var(--brand-bright);
+    }
+}

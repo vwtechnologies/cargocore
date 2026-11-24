@@ -1,5 +1,6 @@
 import { ApiError } from "./types";
 import { notifyRecordsChanged } from "./live-data";
+import { trackWrite } from "./saving";
 let csrfToken: string | undefined;
 
 export async function csrf() {
@@ -20,10 +21,25 @@ export async function csrf() {
     }
     csrfToken = body.token;
 }
-export async function api<T>(
-    path: string,
-    options: RequestInit = {},
-): Promise<T> {
+const writeMethods = ["POST", "PUT", "PATCH", "DELETE"];
+
+/**
+ * Sends a request to the backend. Writes are tracked so the page locks while
+ * they run, and an identical write already in flight is reused, not resent.
+ */
+export function api<T>(path: string, options: RequestInit = {}): Promise<T> {
+    const method = (options.method ?? "GET").toUpperCase();
+    if (!writeMethods.includes(method)) {
+        return request<T>(path, options);
+    }
+    const key =
+        options.body === undefined || typeof options.body === "string"
+            ? `${method} ${path} ${options.body ?? ""}`
+            : null;
+    return trackWrite(key, () => request<T>(path, options));
+}
+
+async function request<T>(path: string, options: RequestInit): Promise<T> {
     const send = () => {
         const token = document.cookie
             .split("; ")
@@ -50,9 +66,7 @@ export async function api<T>(
     let response = await send();
     if (
         response.status === 419 &&
-        ["POST", "PUT", "PATCH", "DELETE"].includes(
-            (options.method ?? "GET").toUpperCase(),
-        )
+        writeMethods.includes((options.method ?? "GET").toUpperCase())
     ) {
         await csrf();
         response = await send();
@@ -77,9 +91,7 @@ export async function api<T>(
     }
     if (
         path.startsWith("/api/v1/") &&
-        ["POST", "PUT", "PATCH", "DELETE"].includes(
-            (options.method ?? "GET").toUpperCase(),
-        )
+        writeMethods.includes((options.method ?? "GET").toUpperCase())
     ) {
         notifyRecordsChanged();
     }

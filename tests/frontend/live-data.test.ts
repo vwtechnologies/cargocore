@@ -5,7 +5,7 @@ import { subscribeToRecordChanges } from "../../resources/js/lib/live-data";
 
 afterEach(() => vi.unstubAllGlobals());
 
-it("refreshes mounted lists and removes cached unmounted lookups only after successful writes", async () => {
+it("refreshes mounted lists and marks cached unmounted lookups stale only after successful writes", async () => {
     vi.stubGlobal("BroadcastChannel", undefined);
     const client = new QueryClient({
         defaultOptions: { queries: { retry: false, staleTime: Infinity } },
@@ -23,13 +23,11 @@ it("refreshes mounted lists and removes cached unmounted lookups only after succ
     const stopChanges = subscribeToRecordChanges(client);
     vi.stubGlobal(
         "fetch",
-        vi
-            .fn()
-            .mockResolvedValue({
-                ok: true,
-                status: 200,
-                json: async () => ({ data: { status: false } }),
-            }),
+        vi.fn().mockResolvedValue({
+            ok: true,
+            status: 200,
+            json: async () => ({ data: { status: false } }),
+        }),
     );
     active = false;
     await api("/api/v1/banks/1");
@@ -38,22 +36,25 @@ it("refreshes mounted lists and removes cached unmounted lookups only after succ
     await vi.waitFor(() =>
         expect(observer.getCurrentResult().data?.data).toEqual([]),
     );
-    expect(client.getQueryData(["lookup", "countries"])).toBeUndefined();
+    expect(client.getQueryData(["lookup", "countries"])).toBeDefined();
+    expect(client.getQueryState(["lookup", "countries"])?.isInvalidated).toBe(
+        true,
+    );
     client.setQueryData(["lookup", "countries"], { data: [] });
     vi.stubGlobal(
         "fetch",
-        vi
-            .fn()
-            .mockResolvedValue({
-                ok: false,
-                status: 422,
-                json: async () => ({ message: "Invalid" }),
-            }),
+        vi.fn().mockResolvedValue({
+            ok: false,
+            status: 422,
+            json: async () => ({ message: "Invalid" }),
+        }),
     );
     await expect(api("/api/v1/banks/1", { method: "PUT" })).rejects.toThrow(
         "Invalid",
     );
-    expect(client.getQueryData(["lookup", "countries"])).toBeDefined();
+    expect(client.getQueryState(["lookup", "countries"])?.isInvalidated).toBe(
+        false,
+    );
     stopChanges();
     stopObserver();
     client.clear();

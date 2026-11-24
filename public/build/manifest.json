@@ -1,34 +1,34 @@
 {
-  "_forms-jscd7TZN.js": {
-    "file": "assets/forms-jscd7TZN.js",
+  "_forms-sGWZO24F.js": {
+    "file": "assets/forms-sGWZO24F.js",
     "name": "forms",
     "imports": [
-      "_query-CFhKuNyq.js"
+      "_query-WoDOQqaS.js"
     ]
   },
-  "_query-CFhKuNyq.js": {
-    "file": "assets/query-CFhKuNyq.js",
+  "_query-WoDOQqaS.js": {
+    "file": "assets/query-WoDOQqaS.js",
     "name": "query"
   },
-  "_react-quBO-SNt.js": {
-    "file": "assets/react-quBO-SNt.js",
+  "_react-CFyOwH8n.js": {
+    "file": "assets/react-CFyOwH8n.js",
     "name": "react",
     "imports": [
-      "_query-CFhKuNyq.js"
+      "_query-WoDOQqaS.js"
     ]
   },
   "resources/js/app.tsx": {
-    "file": "assets/app-BbZjEgyM.js",
+    "file": "assets/app-BC4wQoLv.js",
     "name": "app",
     "src": "resources/js/app.tsx",
     "isEntry": true,
     "imports": [
-      "_query-CFhKuNyq.js",
-      "_react-quBO-SNt.js",
-      "_forms-jscd7TZN.js"
+      "_query-WoDOQqaS.js",
+      "_react-CFyOwH8n.js",
+      "_forms-sGWZO24F.js"
     ],
     "css": [
-      "assets/app-D30ZID6y.css"
+      "assets/app-vRRfkEPB.css"
     ]
   }
 }

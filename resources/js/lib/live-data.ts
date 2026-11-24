@@ -12,8 +12,8 @@ export function subscribeToRecordChanges(client: QueryClient) {
         typeof BroadcastChannel === "undefined"
             ? null
             : new BroadcastChannel(channelName);
+    /** Marks cached pages stale (shown instantly, refreshed in the background) and reloads what is on screen. */
     const refresh = () => {
-        client.removeQueries({ type: "inactive" });
         void client.invalidateQueries();
     };
     const localChange = () => {

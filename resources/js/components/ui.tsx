@@ -1,7 +1,9 @@
 import { titleCaseLabel } from "../lib/labels";
 import { useEffect, useRef, useState, type ReactNode } from "react";
 import * as Dialog from "@radix-ui/react-dialog";
+import { createPortal } from "react-dom";
 import { PageActions } from "./PageActions";
+import { useIsSaving } from "../lib/saving";
 import {
     AlertCircle,
     ArrowUpRight,
@@ -20,6 +22,23 @@ import {
 } from "./icons";
 export function Spinner() {
     return <LoaderCircle className="spin" size={19} />;
+}
+/** App-wide progress bar and "Saving…" badge shown while any save runs. */
+export function SavingIndicator() {
+    const saving = useIsSaving();
+    if (!saving) {
+        return null;
+    }
+    return createPortal(
+        <div className="saving-indicator" role="status" aria-live="polite">
+            <span className="saving-bar" aria-hidden="true" />
+            <span className="saving-badge">
+                <Spinner />
+                Saving…
+            </span>
+        </div>,
+        document.body,
+    );
 }
 export function Loading() {
     return (

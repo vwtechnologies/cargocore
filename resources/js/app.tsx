@@ -12,7 +12,7 @@ import "../css/app.css";
 import { SessionProvider, useSession } from "./lib/session";
 import { DirtyProvider } from "./lib/dirty";
 import { Shell } from "./components/Shell";
-import { Loading, ErrorState } from "./components/ui";
+import { Loading, ErrorState, SavingIndicator } from "./components/ui";
 import { Login } from "./pages/Auth";
 import { Dashboard } from "./pages/Dashboard";
 import { CompaniesPage } from "./pages/CompaniesPage";
@@ -45,7 +45,22 @@ function PermissionPage({
         />
     );
 }
-const queryClient = new QueryClient({
+/**
+ * Every save triggers a global refresh and usually a page-level one as well.
+ * Letting a later invalidation join a reload that is already running (instead
+ * of cancelling and restarting it) means each query is fetched once per save.
+ */
+class SharedRefreshQueryClient extends QueryClient {
+    override invalidateQueries(
+        ...[filters, options]: Parameters<QueryClient["invalidateQueries"]>
+    ): ReturnType<QueryClient["invalidateQueries"]> {
+        return super.invalidateQueries(filters, {
+            cancelRefetch: false,
+            ...options,
+        });
+    }
+}
+const queryClient = new SharedRefreshQueryClient({
     defaultOptions: {
         queries: {
             retry: 1,
@@ -183,6 +198,7 @@ createRoot(document.getElementById("root")!).render(
                 </DirtyProvider>
             </SessionProvider>
             <Toaster position="top-right" richColors closeButton />
+            <SavingIndicator />
         </QueryClientProvider>
     </React.StrictMode>,
 );
