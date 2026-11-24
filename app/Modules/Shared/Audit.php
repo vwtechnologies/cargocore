@@ -7,13 +7,13 @@ use Illuminate\Support\Facades\Auth;
 
 class Audit
 {
-    private const PRIVATE_FIELDS = ['password', 'remember_token', 'two_factor_secret', 'two_factor_recovery_codes', 'path', 'sha256', 'cnic', 'ntn', 'strn', 'account_number', 'iban', 'document_number', 'salary', 'opening_balance', 'address', 'phone', 'mobile', 'email', 'contact_number', 'phone_numbers', 'contact_numbers', 'mobile_numbers', 'comments'];
+    private const PRIVATE_FIELDS = ['password', 'remember_token', 'two_factor_secret', 'two_factor_recovery_codes', 'path', 'sha256', 'cnic', 'ntn', 'strn', 'account_number', 'iban', 'document_number', 'salary', 'opening_balance', 'address', 'phone', 'mobile', 'email', 'contact_number', 'number', 'address_line_1', 'address_line_2', 'weboc_id', 'psw_id', 'phone_numbers', 'contact_numbers', 'mobile_numbers', 'comments', 'account_holder_cnic', 'authorized_signatory_cnic', 'trade_hub_contact', 'trade_hub_email', 'trade_hub_address'];
 
     public static function record(string $action, string $entity, ?int $recordId, array $before = [], array $after = [], ?int $companyId = null, ?string $label = null, ?int $actorId = null): void
     {
         $changes = [];
         foreach (array_unique([...array_keys($before), ...array_keys($after)]) as $key) {
-            if (in_array($key, ['created_at', 'updated_at', 'default_guard'], true) || ($before[$key] ?? null) === ($after[$key] ?? null)) {
+            if (in_array($key, ['created_at', 'updated_at', 'default_guard', 'primary_guard'], true) || ($before[$key] ?? null) === ($after[$key] ?? null)) {
                 continue;
             }
             $private = in_array($key, self::PRIVATE_FIELDS, true);

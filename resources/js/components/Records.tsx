@@ -58,6 +58,7 @@ import {
     PanelTitle,
     useDebounced,
 } from "./ui";
+import { BankAccountSummary } from "./BankAccountSummary";
 const columnsByEntity: Record<string, string[]> = {
     companies: ["name", "code", "short_name", "status"],
     countries: ["name", "short_name", "display_sequence", "status"],
@@ -78,6 +79,15 @@ const columnsByEntity: Record<string, string[]> = {
         "account_number",
         "status",
     ],
+    "bank-accounts": [
+        "account_title",
+        "bank_name",
+        "branch_name",
+        "account_number",
+        "iban",
+        "company_name",
+        "status",
+    ],
     associations: ["company_name", "status"],
     classifications: ["business_type_name", "opening_balance", "status"],
     "person-markas": ["marka_code", "marka_description", "status"],
@@ -94,6 +104,7 @@ const extraLabels: Record<string, string> = {
 export function recordLabel(record: RecordData) {
     return String(
         record.name ??
+            record.account_title ??
             record.company_name ??
             record.business_type_name ??
             record.person_name ??
@@ -662,6 +673,8 @@ export function RecordDetails({
                         onDirty={setDirty}
                         onDone={cancel}
                     />
+                ) : entity === "accounts" || entity === "bank-accounts" ? (
+                    <BankAccountSummary record={record} />
                 ) : (
                     <dl className="detail-grid">
                         {Object.entries(definition.fields)

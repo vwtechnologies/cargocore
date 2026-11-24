@@ -212,13 +212,18 @@ export function SearchableSelect({
                     alignItems: "center",
                     justifyContent: "space-between",
                     gap: "8px",
-                    background: readOnly || disabled ? "#f8faf9" : "#ffffff",
-                    border: isOpen ? "1px solid #18362d" : "1px solid #cfdad4",
+                    background:
+                        readOnly || disabled
+                            ? "var(--surface-subtle)"
+                            : "#ffffff",
+                    border: isOpen
+                        ? "1px solid var(--brand)"
+                        : "1px solid var(--line-strong)",
                     borderRadius: compact ? "6px" : "8px",
                     padding: compact ? "6px 10px" : "9px 12px",
                     minHeight: compact ? "34px" : "42px",
                     fontSize: compact ? "13px" : "14px",
-                    color: selectedOption ? "#1a2a22" : "#9ca3af",
+                    color: selectedOption ? "var(--ink)" : "var(--text-muted)",
                     cursor: isInteractive ? "pointer" : "default",
                     textAlign: "left",
                     transition: "all 0.15s ease",
@@ -234,7 +239,9 @@ export function SearchableSelect({
                         overflow: "hidden",
                         textOverflow: "ellipsis",
                         fontWeight: selectedOption ? 500 : 400,
-                        color: selectedOption ? "#111827" : "#889990",
+                        color: selectedOption
+                            ? "var(--ink)"
+                            : "var(--text-muted)",
                     }}
                 >
                     {selectedOption ? (
@@ -244,12 +251,12 @@ export function SearchableSelect({
                                 <span
                                     style={{
                                         marginLeft: "8px",
-                                        fontSize: "11.5px",
+                                        fontSize: "var(--text-sm)",
                                         fontWeight: 600,
                                         padding: "1px 6px",
                                         borderRadius: "4px",
-                                        background: "#e8f5ee",
-                                        color: "#18362d",
+                                        background: "var(--brand-tint)",
+                                        color: "var(--brand)",
                                     }}
                                 >
                                     {selectedOption.code}
@@ -280,7 +287,7 @@ export function SearchableSelect({
                                 justifyContent: "center",
                                 padding: "2px",
                                 borderRadius: "4px",
-                                color: "#9ca3af",
+                                color: "var(--text-muted)",
                                 cursor: "pointer",
                             }}
                         >
@@ -292,7 +299,7 @@ export function SearchableSelect({
                         <ChevronDown
                             size={16}
                             style={{
-                                color: "#6b7280",
+                                color: "var(--text-muted)",
                                 transform: isOpen ? "rotate(180deg)" : "none",
                                 transition: "transform 0.15s ease",
                             }}
@@ -310,7 +317,7 @@ export function SearchableSelect({
                     style={{
                         zIndex: 9999,
                         background: "#ffffff",
-                        border: "1px solid #d1d5db",
+                        border: "1px solid var(--line-strong)",
                         borderRadius: "8px",
                         boxShadow:
                             "0 10px 25px -5px rgba(0, 0, 0, 0.15), 0 8px 10px -6px rgba(0, 0, 0, 0.1)",
@@ -321,8 +328,8 @@ export function SearchableSelect({
                     <div
                         style={{
                             padding: "8px 10px",
-                            borderBottom: "1px solid #f1f5f3",
-                            background: "#f9fafb",
+                            borderBottom: "1px solid var(--line)",
+                            background: "var(--surface-subtle)",
                             display: "flex",
                             alignItems: "center",
                             gap: "8px",
@@ -330,7 +337,10 @@ export function SearchableSelect({
                     >
                         <Search
                             size={15}
-                            style={{ color: "#6b7280", flexShrink: 0 }}
+                            style={{
+                                color: "var(--text-muted)",
+                                flexShrink: 0,
+                            }}
                         />
                         <input
                             ref={searchInputRef}
@@ -344,8 +354,8 @@ export function SearchableSelect({
                                 border: "none",
                                 outline: "none",
                                 background: "transparent",
-                                fontSize: "13px",
-                                color: "#111827",
+                                fontSize: "var(--text-base)",
+                                color: "var(--ink)",
                                 padding: "4px 0",
                             }}
                         />
@@ -358,7 +368,7 @@ export function SearchableSelect({
                                     background: "transparent",
                                     padding: "2px",
                                     cursor: "pointer",
-                                    color: "#9ca3af",
+                                    color: "var(--text-muted)",
                                 }}
                             >
                                 <X size={13} />
@@ -381,8 +391,8 @@ export function SearchableSelect({
                             <div
                                 style={{
                                     padding: "16px 12px",
-                                    fontSize: "13px",
-                                    color: "#6b7280",
+                                    fontSize: "var(--text-base)",
+                                    color: "var(--text-muted)",
                                     textAlign: "center",
                                 }}
                             >
@@ -414,17 +424,17 @@ export function SearchableSelect({
                                             justifyContent: "space-between",
                                             padding: "8px 10px",
                                             borderRadius: "6px",
-                                            fontSize: "13.5px",
+                                            fontSize: "var(--text-base)",
                                             cursor: "pointer",
                                             background: isHighlighted
-                                                ? "#e8f5ee"
+                                                ? "var(--brand-tint)"
                                                 : isSelected
-                                                  ? "#f0fdf4"
+                                                  ? "var(--brand-tint-subtle)"
                                                   : "transparent",
                                             color:
                                                 isHighlighted || isSelected
-                                                    ? "#18362d"
-                                                    : "#1f2937",
+                                                    ? "var(--brand)"
+                                                    : "var(--ink)",
                                             fontWeight: isSelected ? 600 : 400,
                                             transition:
                                                 "background-color 0.1s ease",
@@ -458,14 +468,15 @@ export function SearchableSelect({
                                                 {opt.code && (
                                                     <span
                                                         style={{
-                                                            fontSize: "11px",
+                                                            fontSize:
+                                                                "var(--text-sm)",
                                                             padding: "1px 5px",
                                                             borderRadius: "4px",
                                                             background:
                                                                 isHighlighted
                                                                     ? "#ffffff"
-                                                                    : "#f3f4f6",
-                                                            color: "#374151",
+                                                                    : "var(--surface-muted)",
+                                                            color: "var(--text-secondary)",
                                                             fontWeight: 600,
                                                         }}
                                                     >
@@ -476,8 +487,9 @@ export function SearchableSelect({
                                             {opt.sublabel && (
                                                 <span
                                                     style={{
-                                                        fontSize: "11.5px",
-                                                        color: "#6b7280",
+                                                        fontSize:
+                                                            "var(--text-sm)",
+                                                        color: "var(--text-muted)",
                                                     }}
                                                 >
                                                     {opt.sublabel}
@@ -489,7 +501,7 @@ export function SearchableSelect({
                                             <Check
                                                 size={15}
                                                 style={{
-                                                    color: "#18362d",
+                                                    color: "var(--brand)",
                                                     flexShrink: 0,
                                                 }}
                                             />

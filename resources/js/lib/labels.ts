@@ -3,8 +3,10 @@ const abbreviations = new Set([
     "CNIC",
     "NTN",
     "STRN",
+    "PSW",
     "UAN",
     "NIFT",
+    "NIC",
     "PKR",
     "ERP",
     "URL",
@@ -19,6 +21,7 @@ const abbreviations = new Set([
 export function titleCaseLabel(value: string): string {
     return value.replace(/[A-Za-z][A-Za-z0-9]*/g, (word) => {
         if (abbreviations.has(word.toUpperCase())) return word.toUpperCase();
+        if (word.toLowerCase() === "weboc") return "WeBOC";
         if (word.toLowerCase() === "cargocore") return "CargoCore";
         return word[0].toUpperCase() + word.slice(1).toLowerCase();
     });

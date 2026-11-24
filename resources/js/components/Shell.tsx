@@ -18,6 +18,7 @@ import {
     Building2,
     Globe,
     Landmark,
+    CreditCard,
     ShieldCheck,
     Contact,
     User,
@@ -59,6 +60,12 @@ const navigationGroups = [
                 module: "geography",
             },
             { label: "Banks", path: "/banks", icon: Landmark, module: "banks" },
+            {
+                label: "Bank Accounts",
+                path: "/bank-accounts",
+                icon: CreditCard,
+                module: "person-accounts",
+            },
             {
                 label: "Employee Types",
                 path: "/employee-types",
@@ -387,8 +394,8 @@ export function Shell() {
                                     <div
                                         style={{
                                             padding: "8px 12px",
-                                            fontSize: "12px",
-                                            color: "#888",
+                                            fontSize: "var(--text-sm)",
+                                            color: "var(--text-muted)",
                                         }}
                                     >
                                         No active companies have portal access
@@ -436,7 +443,7 @@ export function Shell() {
                                 <button
                                     onClick={logout}
                                     className="topbar-dropdown-link"
-                                    style={{ color: "#873d3d" }}
+                                    style={{ color: "var(--danger)" }}
                                 >
                                     <LogOut size={15} />
                                     <span>Sign out</span>

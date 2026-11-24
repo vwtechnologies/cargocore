@@ -8,7 +8,6 @@ import {
     useParams,
 } from "react-router-dom";
 import { Toaster } from "sonner";
-import "@fontsource-variable/inter";
 import "../css/app.css";
 import { SessionProvider, useSession } from "./lib/session";
 import { DirtyProvider } from "./lib/dirty";
@@ -19,6 +18,7 @@ import { Dashboard } from "./pages/Dashboard";
 import { CompaniesPage } from "./pages/CompaniesPage";
 import { CountriesPage } from "./pages/CountriesPage";
 import { BanksPage } from "./pages/BanksPage";
+import { BankAccountsPage } from "./pages/BankAccountsPage";
 import { EmployeeTypesPage } from "./pages/EmployeeTypesPage";
 import { BusinessTypesPage } from "./pages/BusinessTypesPage";
 import { MarkasPage } from "./pages/MarkasPage";
@@ -123,6 +123,14 @@ const router = createBrowserRouter([
                 element: (
                     <PermissionPage permission="banks.view">
                         <BanksPage />
+                    </PermissionPage>
+                ),
+            },
+            {
+                path: "bank-accounts/:id?",
+                element: (
+                    <PermissionPage permission="person-accounts.view">
+                        <BankAccountsPage />
                     </PermissionPage>
                 ),
             },

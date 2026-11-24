@@ -80,7 +80,7 @@ class RecordController extends Controller
             $country = $request->integer('country_id');
             $query->where(fn (Builder $bank) => $bank->where('country_id', $country)->orWhere(fn (Builder $global) => $global->whereNull('country_id')->whereHas('branches', fn (Builder $branch) => VisibleRecords::apply($branch, 'branches')->whereHas('city', fn (Builder $city) => $city->where('country_id', $country)))));
         }
-        $allowedFilters = ['companies' => ['id'], 'sub-companies' => ['company_id'], 'cities' => ['country_id'], 'branches' => ['bank_id', 'city_id'], 'officers' => ['bank_id', 'bank_branch_id'], 'associations' => ['person_id', 'company_id'], 'classifications' => ['person_company_id'], 'contacts' => ['person_id'], 'accounts' => ['person_id'], 'person-markas' => ['person_id', 'marka_id']];
+        $allowedFilters = ['company-contacts' => ['company_id'], 'company-emails' => ['company_id'], 'company-addresses' => ['company_id'], 'company-owners' => ['company_id', 'person_id'], 'companies' => ['id'], 'sub-companies' => ['company_id'], 'cities' => ['country_id'], 'branches' => ['bank_id', 'city_id'], 'officers' => ['bank_id', 'bank_branch_id'], 'branch-contacts' => ['bank_branch_id'], 'associations' => ['person_id', 'company_id'], 'classifications' => ['person_company_id'], 'contacts' => ['person_id'], 'accounts' => ['person_id', 'company_id'], 'bank-accounts' => ['person_id', 'company_id', 'bank_branch_id', 'is_cheque', 'is_beneficiary', 'is_employee', 'is_company', 'is_our_account', 'is_other'], 'person-markas' => ['person_id', 'marka_id']];
         foreach ($allowedFilters[$entity] ?? [] as $filter) {
             if ($request->filled($filter)) {
                 $query->where($filter, $request->input($filter));
@@ -111,12 +111,12 @@ class RecordController extends Controller
             $fields[] = 'code';
         }
         $relatedSearch = match ($entity) {
-            'branches' => ['city'], 'officers' => ['person', 'branch'], 'accounts' => ['branch', 'branch.bank'], 'associations' => ['company'], 'classifications' => ['businessType'], default => []
+            'branches' => ['city'], 'officers' => ['person', 'branch'], 'accounts' => ['branch', 'branch.bank'], 'bank-accounts' => ['branch', 'branch.bank', 'person', 'company'], 'associations' => ['company'], 'classifications' => ['businessType'], default => []
         };
         $relatedSort = match ($entity) {
             'branches' => ['city_name' => '(select name from cities where cities.id=bank_branches.city_id)'],
             'officers' => ['person_name' => '(select name from people where people.id=bank_officers.person_id)', 'branch_name' => '(select name from bank_branches where bank_branches.id=bank_officers.bank_branch_id)'],
-            'accounts' => ['branch_name' => '(select name from bank_branches where bank_branches.id=person_bank_accounts.bank_branch_id)', 'bank_name' => '(select banks.name from banks join bank_branches on bank_branches.bank_id=banks.id where bank_branches.id=person_bank_accounts.bank_branch_id)'],
+            'accounts', 'bank-accounts' => ['branch_name' => '(select name from bank_branches where bank_branches.id=person_bank_accounts.bank_branch_id)', 'bank_name' => '(select banks.name from banks join bank_branches on bank_branches.bank_id=banks.id where bank_branches.id=person_bank_accounts.bank_branch_id)', 'company_name' => '(select name from companies where companies.id=person_bank_accounts.company_id)'],
             'associations' => ['company_name' => '(select name from companies where companies.id=person_companies.company_id)'],
             'classifications' => ['business_type_name' => '(select name from business_types where business_types.id=person_classifications.business_type_id)'],
             'person-markas' => ['marka_code' => '(select code from markas where markas.id=person_markas.marka_id)', 'marka_description' => '(select description from markas where markas.id=person_markas.marka_id)'], default => []
@@ -124,7 +124,7 @@ class RecordController extends Controller
         if ($request->filled('search')) {
             $search = mb_substr($request->string('search')->toString(), 0, 200);
             $query->where(function (Builder $q) use ($fields, $search, $relatedSearch, $entity) {
-                foreach (array_intersect($fields, ['name', 'code', 'description', 'cnic', 'email', 'phone', 'mobile', 'account_title', 'account_number', 'designation', 'label']) as $field) {
+                foreach (array_intersect($fields, ['name', 'code', 'description', 'cnic', 'email', 'phone', 'mobile', 'account_title', 'short_title', 'account_holder_name', 'iban', 'account_number', 'designation', 'label', 'title', 'number', 'address_line_1', 'address_line_2', 'postal_code']) as $field) {
                     $q->orWhere($field, 'like', '%'.addcslashes($search, '%_\\').'%');
                 }
                 foreach ($relatedSearch as $relation) {
@@ -157,7 +157,7 @@ class RecordController extends Controller
             return response()->json(['navigation' => collect($navigation)->except('id')->map(fn ($value) => $value === null ? null : (int) $value)]);
         }
         $relations = match ($entity) {
-            'branches' => ['city.country'],'officers' => ['person', 'branch'],'accounts' => ['branch.bank', 'branch.city.country'],'associations' => ['company'],'classifications' => ['businessType'],'person-markas' => ['marka'],default => []
+            'companies' => ['contacts' => fn ($query) => $query->where('status', true)->where('is_primary', true), 'emails' => fn ($query) => $query->where('status', true)->where('is_primary', true), 'addresses' => fn ($query) => $query->where('status', true)->where('is_primary', true)], 'branches' => ['city.country'],'officers' => ['person', 'branch'],'accounts' => ['branch.bank', 'branch.city.country'], 'bank-accounts' => ['branch.bank', 'branch.city.country', 'person', 'company', 'companyAddress'],'associations' => ['company'],'classifications' => ['businessType'],'person-markas' => ['marka'],default => []
         };
         $page = $query->with($relations)->paginate(min(100, max(1, $request->integer('per_page', 20))));
 

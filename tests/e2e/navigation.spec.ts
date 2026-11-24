@@ -209,10 +209,10 @@ test("sidebar matches the top bar menus and keeps navigation usable on small scr
         ),
     ).toBe(true);
     await drawer
-        .getByRole("link", { name: "Audit history", exact: true })
+        .getByRole("link", { name: "Audit History", exact: true })
         .scrollIntoViewIfNeeded();
     await expect(
-        drawer.getByRole("link", { name: "Audit history", exact: true }),
+        drawer.getByRole("link", { name: "Audit History", exact: true }),
     ).toBeInViewport();
     await expect(drawer.locator(".sidebar-user")).toBeInViewport();
     await page.screenshot({

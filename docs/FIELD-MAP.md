@@ -4,8 +4,14 @@ Generated from EntityRegistry. Internal numeric IDs and immutable business codes
 
 | Screen | Field | Persistence | Control |
 | --- | --- | --- | --- |
-| Companies | Name | `companies.name` | text |
+| Companies | Company Name | `companies.name` | text |
 | Companies | Short name | `companies.short_name` | text |
+| Companies | Type | `companies.type` | combobox |
+| Companies | Parent Company | `companies.parent_company_id` | reference |
+| Companies | NTN | `companies.ntn` | text |
+| Companies | STRN | `companies.strn` | text |
+| Companies | WeBOC ID | `companies.weboc_id` | text |
+| Companies | PSW ID | `companies.psw_id` | text |
 | Companies | Address | `companies.address` | textarea |
 | Companies | Contact number | `companies.contact_number` | text |
 | Companies | Fax number | `companies.fax_number` | text |
@@ -13,6 +19,28 @@ Generated from EntityRegistry. Internal numeric IDs and immutable business codes
 | Companies | Status | `companies.status` | boolean |
 | Companies | Default company | `companies.is_default` | boolean |
 | Companies | Generated business code | `companies.code` | Read-only header |
+| Company Contact Numbers | Title | `company_contacts.title` | text |
+| Company Contact Numbers | Number | `company_contacts.number` | text |
+| Company Contact Numbers | Primary | `company_contacts.is_primary` | boolean |
+| Company Contact Numbers | Status | `company_contacts.status` | boolean |
+| Company Emails | Title | `company_emails.title` | text |
+| Company Emails | Email | `company_emails.email` | email |
+| Company Emails | Primary | `company_emails.is_primary` | boolean |
+| Company Emails | Status | `company_emails.status` | boolean |
+| Company Addresses | Title | `company_addresses.title` | text |
+| Company Addresses | Address Line 1 | `company_addresses.address_line_1` | text |
+| Company Addresses | Address Line 2 | `company_addresses.address_line_2` | text |
+| Company Addresses | Country | `company_addresses.country_id` | reference |
+| Company Addresses | City | `company_addresses.city_id` | reference |
+| Company Addresses | Postal Code | `company_addresses.postal_code` | text |
+| Company Addresses | Primary | `company_addresses.is_primary` | boolean |
+| Company Addresses | Status | `company_addresses.status` | boolean |
+| Owners / Representatives | Person | `company_owners.person_id` | reference |
+| Owners / Representatives | Name | `company_owners.name` | text |
+| Owners / Representatives | CNIC | `company_owners.cnic` | text |
+| Owners / Representatives | Designation | `company_owners.designation` | text |
+| Owners / Representatives | Ownership % | `company_owners.ownership_percentage` | money |
+| Owners / Representatives | Status | `company_owners.status` | boolean |
 | Sub-companies | Sub-company code | `sub_companies.code` | text |
 | Sub-companies | Name | `sub_companies.name` | text |
 | Sub-companies | Default sub-company | `sub_companies.is_default` | boolean |
@@ -38,12 +66,21 @@ Generated from EntityRegistry. Internal numeric IDs and immutable business codes
 | Cities | Generated business code | `cities.code` | Read-only header |
 | Banks | Name | `banks.name` | text |
 | Banks | Short name | `banks.short_name` | text |
+| Banks | Bank code | `banks.bank_code` | text |
+| Banks | SWIFT code | `banks.swift_code` | text |
 | Banks | Country | `banks.country_id` | reference |
 | Banks | UAN | `banks.uan` | text |
 | Banks | Help line | `banks.help_line` | text |
+| Banks | Contact number | `banks.contact_number` | text |
 | Banks | E-Bank | `banks.e_bank` | text |
-| Banks | Website | `banks.website` | url |
+| Banks | Main website | `banks.website` | url |
+| Banks | Internet banking URL | `banks.internet_banking_url` | url |
+| Banks | Corporate banking portal URL | `banks.corporate_banking_url` | url |
 | Banks | Address | `banks.address` | textarea |
+| Banks | Centralized trade hub | `banks.trade_hub_name` | text |
+| Banks | Trade hub contact | `banks.trade_hub_contact` | text |
+| Banks | Trade hub email | `banks.trade_hub_email` | email |
+| Banks | Trade hub address | `banks.trade_hub_address` | textarea |
 | Banks | Status | `banks.status` | boolean |
 | Banks | Generated business code | `banks.code` | Read-only header |
 | Branches | Name | `bank_branches.name` | text |
@@ -52,9 +89,14 @@ Generated from EntityRegistry. Internal numeric IDs and immutable business codes
 | Branches | Branch code | `bank_branches.branch_code` | text |
 | Branches | NIFT code | `bank_branches.nift_code` | text |
 | Branches | Address | `bank_branches.address` | textarea |
-| Branches | Phone numbers | `bank_branches.phone_numbers` | list |
+| Branches | Branch email | `bank_branches.email` | email |
+| Branches | Branch portal URL | `bank_branches.portal_url` | url |
 | Branches | Status | `bank_branches.status` | boolean |
 | Branches | Generated business code | `bank_branches.code` | Read-only header |
+| Branch Contact Numbers | Title | `bank_branch_contacts.title` | text |
+| Branch Contact Numbers | Number | `bank_branch_contacts.number` | text |
+| Branch Contact Numbers | Primary | `bank_branch_contacts.is_primary` | boolean |
+| Branch Contact Numbers | Status | `bank_branch_contacts.status` | boolean |
 | Bank officers | Person | `bank_officers.person_id` | reference |
 | Bank officers | Branch | `bank_officers.bank_branch_id` | reference |
 | Bank officers | Officer designation | `bank_officers.designation` | text |
@@ -99,6 +141,47 @@ Generated from EntityRegistry. Internal numeric IDs and immutable business codes
 | Bank accounts | Account number | `person_bank_accounts.account_number` | text |
 | Bank accounts | IBAN | `person_bank_accounts.iban` | text |
 | Bank accounts | Account title | `person_bank_accounts.account_title` | text |
+| Bank accounts | Short title | `person_bank_accounts.short_title` | text |
+| Bank accounts | Account holder name | `person_bank_accounts.account_holder_name` | text |
+| Bank accounts | Account holder CNIC / NIC | `person_bank_accounts.account_holder_cnic` | text |
+| Bank accounts | Authorized signatory | `person_bank_accounts.authorized_signatory_name` | text |
+| Bank accounts | Authorized signatory CNIC | `person_bank_accounts.authorized_signatory_cnic` | text |
+| Bank accounts | Account type | `person_bank_accounts.account_type` | combobox |
+| Bank accounts | Cheque | `person_bank_accounts.is_cheque` | boolean |
+| Bank accounts | Beneficiary | `person_bank_accounts.is_beneficiary` | boolean |
+| Bank accounts | Employee | `person_bank_accounts.is_employee` | boolean |
+| Bank accounts | Company | `person_bank_accounts.is_company` | boolean |
+| Bank accounts | Our account | `person_bank_accounts.is_our_account` | boolean |
+| Bank accounts | Other | `person_bank_accounts.is_other` | boolean |
+| Bank accounts | Legal Account Company | `person_bank_accounts.company_id` | reference |
+| Bank accounts | Company Address | `person_bank_accounts.company_address_id` | reference |
+| Bank accounts | Opening balance date | `person_bank_accounts.opening_balance_date` | date |
+| Bank accounts | Opening balance | `person_bank_accounts.opening_balance` | money |
+| Bank accounts | Status | `person_bank_accounts.status` | boolean |
+| Bank accounts | Linked person | `person_bank_accounts.person_id` | reference |
+| Bank accounts | Bank | `Derived through bank_branches → cities → countries / banks` | reference |
+| Bank accounts | Country | `Derived through bank_branches → cities → countries / banks` | reference |
+| Bank accounts | City | `Derived through bank_branches → cities → countries / banks` | reference |
+| Bank accounts | Branch | `person_bank_accounts.bank_branch_id` | reference |
+| Bank accounts | Account number | `person_bank_accounts.account_number` | text |
+| Bank accounts | IBAN | `person_bank_accounts.iban` | text |
+| Bank accounts | Account title | `person_bank_accounts.account_title` | text |
+| Bank accounts | Short title | `person_bank_accounts.short_title` | text |
+| Bank accounts | Account holder name | `person_bank_accounts.account_holder_name` | text |
+| Bank accounts | Account holder CNIC / NIC | `person_bank_accounts.account_holder_cnic` | text |
+| Bank accounts | Authorized signatory | `person_bank_accounts.authorized_signatory_name` | text |
+| Bank accounts | Authorized signatory CNIC | `person_bank_accounts.authorized_signatory_cnic` | text |
+| Bank accounts | Account type | `person_bank_accounts.account_type` | combobox |
+| Bank accounts | Cheque | `person_bank_accounts.is_cheque` | boolean |
+| Bank accounts | Beneficiary | `person_bank_accounts.is_beneficiary` | boolean |
+| Bank accounts | Employee | `person_bank_accounts.is_employee` | boolean |
+| Bank accounts | Company | `person_bank_accounts.is_company` | boolean |
+| Bank accounts | Our account | `person_bank_accounts.is_our_account` | boolean |
+| Bank accounts | Other | `person_bank_accounts.is_other` | boolean |
+| Bank accounts | Legal Account Company | `person_bank_accounts.company_id` | reference |
+| Bank accounts | Company Address | `person_bank_accounts.company_address_id` | reference |
+| Bank accounts | Opening balance date | `person_bank_accounts.opening_balance_date` | date |
+| Bank accounts | Opening balance | `person_bank_accounts.opening_balance` | money |
 | Bank accounts | Status | `person_bank_accounts.status` | boolean |
 | Company associations | Company | `person_companies.company_id` | reference |
 | Company associations | Status | `person_companies.status` | boolean |

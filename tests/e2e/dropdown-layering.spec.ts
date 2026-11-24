@@ -55,8 +55,16 @@ for (const viewport of [
         expect(popoverBounds!.y + popoverBounds!.height).toBeLessThanOrEqual(
             viewport.height,
         );
-        if (viewport.height === 500)
-            await expect(popover).toHaveAttribute("data-placement", "above");
+        const triggerBounds = await country.boundingBox();
+        const placement = await popover.getAttribute("data-placement");
+        if (placement === "above")
+            expect(
+                popoverBounds!.y + popoverBounds!.height,
+            ).toBeLessThanOrEqual(triggerBounds!.y + 1);
+        else
+            expect(popoverBounds!.y).toBeGreaterThanOrEqual(
+                triggerBounds!.y + triggerBounds!.height - 1,
+            );
         const isUncovered = await china.evaluate((option) => {
             const bounds = option.getBoundingClientRect();
             const topElement = document.elementFromPoint(
@@ -78,7 +86,11 @@ for (const viewport of [
         await search.press("Escape");
         await expect(country).toBeFocused();
         await expect(page.getByRole("listbox")).not.toBeVisible();
-        await page.getByRole("button", { name: "Cancel", exact: true }).click();
+        await page
+            .getByRole("button", { name: "Cancel", exact: true })
+            .locator("visible=true")
+            .first()
+            .click();
     });
 }
 

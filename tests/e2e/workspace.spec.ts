@@ -197,7 +197,9 @@ test("person documents remain available and bank account data stays deferred", a
     ).json();
     await page.getByRole("tab", { name: "Bank Accounts", exact: true }).click();
     await expect(
-        page.getByRole("heading", { name: "Coming Soon", exact: true }),
+        page
+            .locator("section.related-inline-section")
+            .getByRole("button", { name: "Add Row", exact: true }),
     ).toBeVisible();
     await page
         .getByRole("tab", { name: "Personal Details", exact: true })

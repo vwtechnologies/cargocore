@@ -22,13 +22,19 @@ export function RecordForm({
     onDone,
     onDirty,
     defaults = {},
+    formId,
+    hideActions = false,
 }: {
     entity: string;
     record?: RecordData;
     parent?: Parent;
-    onDone: (saved?: boolean) => void;
+    onDone: (saved?: boolean, savedRecord?: RecordData) => void;
     onDirty?: (dirty: boolean) => void;
     defaults?: Record<string, unknown>;
+    /** Lets a page header button submit this form with `form.requestSubmit()`. */
+    formId?: string;
+    /** Hides the built-in Cancel/Save bar when the page header provides those actions. */
+    hideActions?: boolean;
 }) {
     const { session, refresh } = useSession();
     const definition = session.entities[entity];
@@ -73,8 +79,59 @@ export function RecordForm({
     const entries = Object.entries(definition.fields);
     const contactField = (key: string) =>
         /address|phone|mobile|email|website|contact/.test(key);
+    const isAccount = entity === "accounts" || entity === "bank-accounts";
+    const accountGroup = (title: string, keys: string[]) => ({
+        title,
+        fields: keys
+            .filter((key) => key in definition.fields)
+            .map((key) => [key, definition.fields[key]] as [string, Field]),
+    });
+    const showsAccountCompany =
+        !!values.is_our_account || !!values.is_company || !!values.company_id;
     const fieldGroups: { title?: string; fields: [string, Field][] }[] =
-        entries.length > 8
+        isAccount
+            ? [
+                  accountGroup("Bank & Branch", [
+                      "country_id",
+                      "bank_id",
+                      "city_id",
+                      "bank_branch_id",
+                  ]),
+                  accountGroup("Account Details", [
+                      "account_number",
+                      "iban",
+                      "account_title",
+                      "short_title",
+                      "account_type",
+                      "person_id",
+                      "account_holder_name",
+                      "account_holder_cnic",
+                      "authorized_signatory_name",
+                      "authorized_signatory_cnic",
+                  ]),
+                  accountGroup("Categories", [
+                      "is_our_account",
+                      "is_cheque",
+                      "is_beneficiary",
+                      "is_employee",
+                      "is_company",
+                      "is_other",
+                  ]),
+                  ...(showsAccountCompany
+                      ? [
+                            accountGroup("Our Company & Banking Address", [
+                                "company_id",
+                                "company_address_id",
+                            ]),
+                        ]
+                      : []),
+                  accountGroup("Opening Balance", [
+                      "opening_balance_date",
+                      "opening_balance",
+                  ]),
+                  accountGroup("Status", ["status"]),
+              ].filter((group) => group.fields.length > 0)
+            : entries.length > 8
             ? [
                   {
                       title: "General",
@@ -123,19 +180,19 @@ export function RecordForm({
                 if (f.type === "number" && body[k] !== null)
                     body[k] = Number(body[k]);
             });
-            return api(
+            return api<{ data: RecordData }>(
                 `${endpoint(entity, parent)}${record ? `/${record.id}` : ""}`,
                 { method: record ? "PUT" : "POST", body: JSON.stringify(body) },
             );
         },
-        onSuccess: async () => {
+        onSuccess: async (response) => {
             reset(values);
             onDirty?.(false);
             guard.clear();
             await cache.invalidateQueries();
             if (entity === "companies") await refresh();
             toast.success(record ? "Changes saved" : "Record created");
-            onDone(true);
+            onDone(true, response?.data);
         },
         onError: (error) => {
             if (error instanceof ApiError)
@@ -189,9 +246,11 @@ export function RecordForm({
     };
     function changeReference(key: string, value: unknown) {
         setValue(key, value, { shouldDirty: true });
+        if (key === "company_id" && "company_address_id" in values)
+            setValue("company_address_id", null, { shouldDirty: true });
         if (key === "country_id") {
             setValue("city_id", null, { shouldDirty: true });
-            if (entity === "accounts" && "bank_id" in values)
+            if (isAccount && "bank_id" in values)
                 setValue("bank_id", null, { shouldDirty: true });
             if ("bank_branch_id" in values)
                 setValue("bank_branch_id", null, { shouldDirty: true });
@@ -203,6 +262,7 @@ export function RecordForm({
     return (
         <>
             <form
+                id={formId}
                 ref={shortcutScope}
                 onSubmit={handleSubmit((data) => mutation.mutate(data))}
                 className="record-form"
@@ -223,10 +283,10 @@ export function RecordForm({
                                     if (
                                         (field.depends &&
                                             !values[field.depends]) ||
-                                        (entity === "accounts" &&
+                                        (isAccount &&
                                             field.entity === "banks" &&
                                             !values.country_id) ||
-                                        (entity === "accounts" &&
+                                        (isAccount &&
                                             field.entity === "branches" &&
                                             !values.bank_id) ||
                                         (entity === "people" &&
@@ -238,10 +298,11 @@ export function RecordForm({
                                     const filters: Record<string, unknown> = {};
                                     if (
                                         field.entity === "cities" ||
-                                        (entity === "accounts" &&
-                                            field.entity === "banks")
+                                        (isAccount && field.entity === "banks")
                                     )
                                         filters.country_id = values.country_id;
+                                    if (field.entity === "company-addresses")
+                                        filters.company_id = values.company_id;
                                     if (field.entity === "branches") {
                                         filters.bank_id =
                                             entity === "officers"
@@ -348,7 +409,12 @@ export function RecordForm({
                                                                     ? f.value
                                                                         ? "Active"
                                                                         : "Inactive"
-                                                                    : "Set as default"}
+                                                                    : key ===
+                                                                        "is_default"
+                                                                      ? "Set as default"
+                                                                      : titleCaseLabel(
+                                                                            field.label,
+                                                                        )}
                                                             </span>
                                                         </label>
                                                     )}
@@ -427,7 +493,7 @@ export function RecordForm({
                                                     }
                                                     min={field.min}
                                                     maxLength={
-                                                        key === "cnic"
+                                                        key.endsWith("cnic")
                                                             ? 15
                                                             : field.max
                                                     }
@@ -505,7 +571,7 @@ export function RecordForm({
                             latest record
                         </button>
                     )}
-                <div className="form-actions">
+                <div className="form-actions" hidden={hideActions}>
                     <span className="muted">
                         {isDirty
                             ? "You have unsaved changes"

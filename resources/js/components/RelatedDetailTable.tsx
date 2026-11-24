@@ -24,6 +24,20 @@ import {
 import { Plus, Search } from "./icons";
 
 type Values = Record<string, unknown>;
+/** Quick-entry columns for a person's accounts; the full unified form opens from the selected row. */
+const inlineAccountFields = new Set([
+    "country_id",
+    "bank_id",
+    "city_id",
+    "bank_branch_id",
+    "account_number",
+    "iban",
+    "account_title",
+    "account_type",
+    "company_id",
+    "company_address_id",
+    "status",
+]);
 export function RelatedDetailTable({
     entity,
     parent,
@@ -82,7 +96,8 @@ export function RelatedDetailTable({
                 ([key]) =>
                     key !== "code" &&
                     key !== "type_number" &&
-                    !(entity === "contacts" && key === "label"),
+                    !(entity === "contacts" && key === "label") &&
+                    !(entity === "accounts" && !inlineAccountFields.has(key)),
             ),
         [definition, entity],
     );
@@ -97,6 +112,8 @@ export function RelatedDetailTable({
             (entity === "accounts" && field.entity === "banks")
         )
             return { country_id: value.country_id };
+        if (field.entity === "company-addresses")
+            return { company_id: value.company_id };
         if (field.entity === "branches")
             return {
                 bank_id: entity === "officers" ? parent.id : value.bank_id,
@@ -116,7 +133,13 @@ export function RelatedDetailTable({
                     ? "160px"
                     : "200px",
         render: (_record, value) =>
-            field.type === "boolean" ? (
+            key === "is_primary" ? (
+                value[key] ? (
+                    "Primary"
+                ) : (
+                    "—"
+                )
+            ) : field.type === "boolean" ? (
                 <Badge active={!!value[key]} />
             ) : field.type === "reference" ? (
                 <ReferenceSelect
@@ -132,6 +155,26 @@ export function RelatedDetailTable({
                 String(value[key] || "—")
             ),
         editor: (value, change) => {
+            if (key === "is_primary")
+                return (
+                    <input
+                        type="checkbox"
+                        aria-label="Primary"
+                        checked={!!value[key]}
+                        onChange={(event) => change(key, event.target.checked)}
+                    />
+                );
+            if (
+                entity === "company-owners" &&
+                value.person_id &&
+                ["name", "cnic"].includes(key)
+            )
+                return (
+                    <OwnerIdentity
+                        person={Number(value.person_id)}
+                        field={key}
+                    />
+                );
             if (field.depends && !value[field.depends])
                 return (
                     <span className="muted">
@@ -162,6 +205,18 @@ export function RelatedDetailTable({
                         disabled={!!field.depends && !value[field.depends]}
                         onChange={(selected) => {
                             change(key, selected);
+                            if (
+                                key === "company_id" &&
+                                "company_address_id" in value
+                            )
+                                change("company_address_id", null);
+                            if (
+                                entity === "company-owners" &&
+                                key === "person_id"
+                            ) {
+                                change("name", "");
+                                change("cnic", "");
+                            }
                             if (key === "country_id") {
                                 if ("city_id" in value) change("city_id", null);
                                 if (entity === "accounts")
@@ -411,6 +466,23 @@ function MarkaDescription({ id }: { id: unknown }) {
                 : query.isPending
                   ? "Loading…"
                   : String(query.data?.data[0]?.description ?? "Unavailable")}
+        </span>
+    );
+}
+
+function OwnerIdentity({ person, field }: { person: number; field: string }) {
+    const query = useQuery({
+        queryKey: ["owner-person", person],
+        queryFn: () =>
+            managementApi<{ data: RecordData }>(`/api/v1/people/${person}`),
+    });
+    return (
+        <span className="reference-value">
+            {query.isPending
+                ? "Loading…"
+                : query.error
+                  ? "Person unavailable"
+                  : String(query.data?.data[field] ?? "—")}
         </span>
     );
 }

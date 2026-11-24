@@ -115,7 +115,7 @@ test("branches and officers use compact rows while preserving their links and fu
     await grid.getByRole("columnheader", { name: /Branch Name/i }).click();
     const row = grid.getByRole("row", { name: "New branch", exact: true });
     await expect(row.locator("td[colspan]")).toHaveCount(0);
-    await expect(row.locator("td")).toHaveCount(8);
+    await expect(row.locator("td")).toHaveCount(10);
     await row
         .getByLabel("Branch Name", { exact: true })
         .fill("Inline Karachi Branch");
@@ -126,9 +126,6 @@ test("branches and officers use compact rows while preserving their links and fu
         .click();
     await row.getByLabel("Branch Code", { exact: true }).fill("0099");
     await row.getByLabel("NIFT Code", { exact: true }).fill("0019");
-    await row
-        .getByLabel("Branch Phone Numbers", { exact: true })
-        .fill("000123, 000456");
     await row
         .getByLabel("Branch Address", { exact: true })
         .fill("Harbour Road");
@@ -143,7 +140,7 @@ test("branches and officers use compact rows while preserving their links and fu
     const response = await creating;
     expect(response.status()).toBe(201);
     const branch = (await response.json()).data;
-    expect(branch.phone_numbers).toEqual(["000123", "000456"]);
+    expect(branch).not.toHaveProperty("phone_numbers");
     expect(branch.address).toBe("HARBOUR ROAD");
     const officers = page.getByRole("grid", { name: "Officers", exact: true });
     await officers.getByRole("columnheader", { name: /Officer Name/i }).click();

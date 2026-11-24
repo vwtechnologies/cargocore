@@ -42,7 +42,7 @@ export function formSchema(fields: Record<string, Field>) {
                         `Enter a whole number of at least ${field.min ?? 0}.`,
                     );
                 if (
-                    key === "cnic" &&
+                    key.endsWith("cnic") &&
                     !/^\d{13}$/.test(String(value).replace(/[\s-]/g, ""))
                 )
                     issue("CNIC must contain 13 digits.");

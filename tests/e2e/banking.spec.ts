@@ -53,13 +53,13 @@ test("bank information, country-filtered branches, and linked officers persist o
     await bankForm.getByLabel("Helpline", { exact: true }).fill("00111888");
     await bankForm.getByLabel("E-Bank", { exact: true }).fill("EBANK-CHINA-07");
     await bankForm
-        .getByLabel("Website", { exact: true })
+        .getByLabel("Main Website", { exact: true })
         .fill("https://bank.example.test");
     await bankForm
         .getByRole("combobox", { name: "Bank Country", exact: true })
         .click();
     await page.getByRole("option", { name: /China/ }).click();
-    await expect(bankForm.getByLabel(/Bank ID|SWIFT|BIC/)).toHaveCount(0);
+    await expect(bankForm.getByLabel(/Bank ID|BIC/)).toHaveCount(0);
     const fieldTops = await bankForm
         .locator(".bank-fields-grid > .company-field")
         .evaluateAll((fields) =>
@@ -85,9 +85,13 @@ test("bank information, country-filtered branches, and linked officers persist o
         uan: "000400123",
         help_line: "00111888",
         e_bank: "EBANK-CHINA-07",
-        website: "https://bank.example.test",
+        website: "HTTPS://BANK.EXAMPLE.TEST",
         country_id: seed.china.id,
     });
+    await expect(page).toHaveURL(new RegExp(`/banks/${bank.id}$`));
+    await expect(
+        page.getByRole("textbox", { name: "Bank Name", exact: true }),
+    ).toHaveValue("BANK FORM INTEGRATION BANK");
     await expect(
         page.getByRole("region", { name: "Branches", exact: true }),
     ).toBeVisible();
@@ -106,17 +110,17 @@ test("bank information, country-filtered branches, and linked officers persist o
     await expect(
         branchForm
             .locator(".reference-options")
-            .getByRole("button", { name: /Rawalpindi/ }),
+            .getByRole("button", { name: /Rawalpindi/i }),
     ).toHaveCount(0);
     await branchForm
         .locator(".reference-options")
-        .getByRole("button", { name: /Bank Form China City/ })
+        .getByRole("button", { name: /Bank Form China City/i })
         .click();
     await branchForm.getByLabel("Branch Code", { exact: true }).fill("0007");
     await branchForm.getByLabel("NIFT Code", { exact: true }).fill("0017");
-    await branchForm
-        .getByLabel("Branch Phone Numbers", { exact: true })
-        .fill("000123, 000456");
+    await expect(
+        branchForm.getByLabel("Branch Phone Numbers", { exact: true }),
+    ).toHaveCount(0);
     await expect(branchForm.getByLabel(/Branch ID/)).toHaveCount(0);
     const savingBranch = page.waitForResponse(
         (response) =>
@@ -132,15 +136,42 @@ test("bank information, country-filtered branches, and linked officers persist o
         city_id: seed.city.id,
         branch_code: "0007",
         nift_code: "0017",
-        phone_numbers: ["000123", "000456"],
     });
+    expect(branch).not.toHaveProperty("phone_numbers");
     expect(branch.code).toMatch(/^BRN-/);
     await expect(page.getByText(branch.code, { exact: true })).toHaveCount(0);
     await page
-        .getByRole("row", { name: "China Main Office", exact: true })
+        .getByRole("row", { name: "CHINA MAIN OFFICE", exact: true })
         .locator("td")
         .first()
         .click();
+    const branchContacts = page.getByRole("region", {
+        name: "Branch contact numbers",
+        exact: true,
+    });
+    for (const [title, number, primary] of [
+        ["Landline", "000123", false],
+        ["Trade Desk", "000456", true],
+    ] as const) {
+        await branchContacts
+            .getByRole("button", { name: "Add Row", exact: true })
+            .click();
+        const contactRow = branchContacts.locator("tr[data-editing]");
+        await contactRow.getByLabel("Title", { exact: true }).fill(title);
+        await contactRow.getByLabel("Number", { exact: true }).fill(number);
+        if (primary) {
+            await contactRow
+                .getByRole("checkbox", { name: "Primary", exact: true })
+                .check();
+        }
+        await contactRow
+            .getByRole("button", { name: "Save changes", exact: true })
+            .click();
+        await expect(
+            branchContacts.getByText(number, { exact: true }),
+        ).toBeVisible();
+    }
+    await expect(branchContacts.getByText("TRADE DESK")).toBeVisible();
     await page
         .getByRole("button", { name: "Add officer", exact: true })
         .click();
@@ -178,12 +209,12 @@ test("bank information, country-filtered branches, and linked officers persist o
     expect(officer).toMatchObject({
         bank_id: bank.id,
         bank_branch_id: branch.id,
-        designation: "Branch Manager",
+        designation: "BRANCH MANAGER",
         contact_number: "000789",
-        email: "officer@example.test",
+        email: "OFFICER@EXAMPLE.TEST",
     });
     await expect(
-        page.getByText("Bank Form Officer", { exact: true }),
+        page.getByText("BANK FORM OFFICER", { exact: true }),
     ).toBeVisible();
     await page.reload();
     await expect(page.getByLabel("E-Bank", { exact: true })).toHaveValue(
@@ -191,13 +222,13 @@ test("bank information, country-filtered branches, and linked officers persist o
     );
     await expect(page.getByText("0017", { exact: true })).toBeVisible();
     await expect(
-        page.getByText("Bank Form Officer", { exact: true }),
+        page.getByText("BANK FORM OFFICER", { exact: true }),
     ).toBeVisible();
     await page
-        .getByRole("button", { name: "Edit China Main Office", exact: true })
+        .getByRole("button", { name: "Edit CHINA MAIN OFFICE", exact: true })
         .click();
     const editingBranch = page.getByRole("row", {
-        name: "China Main Office",
+        name: "CHINA MAIN OFFICE",
         exact: true,
     });
     await editingBranch.getByLabel("NIFT Code", { exact: true }).fill("");
@@ -215,8 +246,11 @@ test("bank information, country-filtered branches, and linked officers persist o
         ).json()
     ).data;
     expect(cleared.nift_code).toBeNull();
-    expect(cleared.phone_numbers).toEqual(["000123", "000456"]);
-    await page.getByRole("button", { name: "Edit", exact: true }).click();
+    expect(cleared.primary_contact_number).toBe("000456");
+    await page
+        .getByRole("group", { name: "Page actions" })
+        .getByRole("button", { name: "Edit", exact: true })
+        .click();
     await page.getByLabel("Helpline", { exact: true }).fill("");
     await page
         .getByRole("button", { name: "Save record", exact: true })
@@ -233,10 +267,10 @@ test("bank information, country-filtered branches, and linked officers persist o
         .toBeNull();
     await page.setViewportSize({ width: 390, height: 844 });
     await page
-        .getByRole("button", { name: "Edit China Main Office", exact: true })
+        .getByRole("button", { name: "Edit CHINA MAIN OFFICE", exact: true })
         .click();
     const mobile = page.getByRole("row", {
-        name: "China Main Office",
+        name: "CHINA MAIN OFFICE",
         exact: true,
     });
     const layout = await mobile.evaluate((row) => ({
@@ -254,14 +288,14 @@ test("bank information, country-filtered branches, and linked officers persist o
     await page.setViewportSize({ width: 1440, height: 1100 });
     await mobile.getByRole("button", { name: "Cancel", exact: true }).click();
     await page
-        .getByRole("button", { name: "Delete Bank Form Officer", exact: true })
+        .getByRole("button", { name: "Remove BANK FORM OFFICER", exact: true })
         .click();
     await page
         .getByRole("dialog", { name: "Delete officer?" })
         .getByRole("button", { name: "Delete record", exact: true })
         .click();
     await expect(
-        page.getByText("Bank Form Officer", { exact: true }),
+        page.getByText("BANK FORM OFFICER", { exact: true }),
     ).toHaveCount(0);
     expect(
         (
@@ -269,7 +303,7 @@ test("bank information, country-filtered branches, and linked officers persist o
         ).status(),
     ).toBe(200);
     await page
-        .getByRole("button", { name: "Delete China Main Office", exact: true })
+        .getByRole("button", { name: "Remove CHINA MAIN OFFICE", exact: true })
         .click();
     await page
         .getByRole("dialog", { name: "Delete branch?" })
@@ -286,12 +320,12 @@ test("bank information, country-filtered branches, and linked officers persist o
         .getByRole("button", { name: "Cancel", exact: true })
         .click();
     const retainedRow = page.getByRole("row", {
-        name: "China Main Office",
+        name: "CHINA MAIN OFFICE",
         exact: true,
     });
     await retainedRow.locator("td").first().click();
     await retainedRow
-        .getByRole("switch", { name: "Branch status", exact: true })
+        .getByRole("switch", { name: "Branch Status", exact: true })
         .click();
     await retainedRow
         .getByRole("button", { name: "Save changes", exact: true })

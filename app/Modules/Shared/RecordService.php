@@ -43,6 +43,12 @@ class RecordService
     public function serialize(string $entity, Record $record): array
     {
         $data = $record->attributesToArray();
+        if ($entity === 'companies') {
+            $record->loadMissing(['contacts' => fn ($query) => $query->where('status', true)->where('is_primary', true), 'emails' => fn ($query) => $query->where('status', true)->where('is_primary', true), 'addresses' => fn ($query) => $query->where('status', true)->where('is_primary', true)]);
+            $data['primary_contact_number'] = $record->contacts->first()?->number;
+            $data['primary_email'] = $record->emails->first()?->email;
+            $data['primary_address'] = $record->addresses->first()?->address_line_1;
+        }
         if ($entity === 'people') {
             $record->loadMissing('city.country');
             $data['city_name'] = $record->city?->status && $record->city?->country?->status ? $record->city->name : null;
@@ -52,7 +58,8 @@ class RecordService
             $data['country_name'] = $record->country?->name;
         }
         if ($entity === 'branches') {
-            $record->loadMissing('city.country');
+            $record->loadMissing(['city.country', 'contacts' => fn ($query) => $query->where('status', true)->orderByDesc('is_primary')->orderBy('id')]);
+            $data['primary_contact_number'] = $record->contacts->first()?->number;
             $data['country_id'] = $record->city->country_id;
             $data['country_name'] = $record->city->country?->name;
             $data['city_name'] = $record->city->name;
@@ -62,10 +69,17 @@ class RecordService
             $data['person_name'] = $record->person?->name;
             $data['branch_name'] = $record->branch?->name ?? 'Bank-wide';
         }
-        if ($entity === 'accounts') {
-            $record->loadMissing('branch.bank', 'branch.city.country');
+        if ($entity === 'company-addresses') {
+            $data['name'] = $record->title.' — '.$record->address_line_1;
+        }
+        if ($entity === 'accounts' || $entity === 'bank-accounts') {
+            $record->loadMissing('branch.bank', 'branch.city.country', 'company', 'companyAddress', 'person');
+            $data['company_name'] = $record->company?->name;
+            $data['company_address_title'] = $record->companyAddress?->title;
+            $data['company_address'] = $record->companyAddress ? trim($record->companyAddress->address_line_1.' '.$record->companyAddress->address_line_2) : null;
+            $data['person_name'] = $record->person?->name;
             $branch = $record->branch;
-            $data += ['bank_id' => $branch?->bank_id, 'country_id' => $branch?->city?->country_id, 'city_id' => $branch?->city_id, 'country_name' => $branch?->city?->country?->name, 'bank_name' => $branch?->bank?->name, 'city_name' => $branch?->city?->name, 'branch_name' => $branch?->name];
+            $data += ['bank_id' => $branch?->bank_id, 'country_id' => $branch?->city?->country_id, 'city_id' => $branch?->city_id, 'country_name' => $branch?->city?->country?->name, 'bank_name' => $branch?->bank?->name, 'bank_code' => $branch?->bank?->bank_code, 'city_name' => $branch?->city?->name, 'branch_name' => $branch?->name, 'branch_code' => $branch?->branch_code];
         }
         if ($entity === 'associations') {
             $data['company_name'] = $record->company?->name;
@@ -139,6 +153,25 @@ class RecordService
                         $unique->withoutTrashed();
                     }
                     $rules[$key][] = $unique;
+                }
+            }
+            if ($entity === 'accounts' || $entity === 'bank-accounts') {
+                foreach (['account_holder_cnic', 'authorized_signatory_cnic'] as $cnic) {
+                    if (! empty($input[$cnic]) && is_string($input[$cnic])) {
+                        $input[$cnic] = preg_replace('/[\s-]+/', '', $input[$cnic]);
+                    }
+                    $rules[$cnic][] = 'regex:/^[0-9]{13}$/';
+                }
+            }
+            if ($entity === 'company-owners') {
+                if (! empty($input['cnic'])) {
+                    $input['cnic'] = preg_replace('/[\\s-]+/', '', $input['cnic']);
+                }
+                $rules['cnic'][] = 'regex:/^[0-9]{13}$/';
+            }
+            if ($entity === 'companies') {
+                foreach (['weboc_password', 'psw_password', 'portal_password'] as $password) {
+                    $rules[$password] = ['prohibited'];
                 }
             }
             if ($entity === 'people') {
@@ -249,7 +282,7 @@ class RecordService
     public function companyId(string $entity, Record $record): ?int
     {
         return match ($entity) {
-            'companies' => $record->id,'sub-companies','associations' => $record->company_id,'classifications' => PersonCompany::find($record->person_company_id)?->company_id,default => null
+            'companies' => $record->id,'sub-companies','associations','company-contacts','company-emails','company-addresses','company-owners','accounts','bank-accounts' => $record->company_id,'classifications' => PersonCompany::find($record->person_company_id)?->company_id,default => null
         };
     }
 }

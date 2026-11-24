@@ -144,7 +144,7 @@ class DemoSeeder extends Seeder
                 }
                 $banks[] = $bank;
                 foreach (array_slice($cities, 0, 3) as $j => $city) {
-                    BankBranch::firstOrCreate(['code' => 'BRN-DEMO-'.$i.'-'.$j], ['name' => $city->name.' Main Branch', 'bank_id' => $bank->id, 'city_id' => $city->id, 'branch_code' => str_pad((string) ($i * 100 + $j + 1), 4, '0', STR_PAD_LEFT), 'phone_numbers' => []]);
+                    BankBranch::firstOrCreate(['code' => 'BRN-DEMO-'.$i.'-'.$j], ['name' => $city->name.' Main Branch', 'bank_id' => $bank->id, 'city_id' => $city->id, 'branch_code' => str_pad((string) ($i * 100 + $j + 1), 4, '0', STR_PAD_LEFT)]);
                 }
             }
             foreach (['Ahmed Hassan', 'Sara Khan', 'Usman Ali', 'Ayesha Malik', 'Imran Shah', 'Fatima Noor', 'Omar Farooq', 'Zainab Ahmed', 'Bilal Qureshi', 'Maryam Saeed', 'Ali Raza', 'Hina Akhtar'] as $i => $name) {

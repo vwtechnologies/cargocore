@@ -7,11 +7,6 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class BankBranch extends Record
 {
-    protected function casts(): array
-    {
-        return array_merge(parent::casts(), ['phone_numbers' => 'array']);
-    }
-
     public function bank(): BelongsTo
     {
         return $this->belongsTo(Bank::class);
@@ -20,6 +15,11 @@ class BankBranch extends Record
     public function city(): BelongsTo
     {
         return $this->belongsTo(City::class);
+    }
+
+    public function contacts(): HasMany
+    {
+        return $this->hasMany(BankBranchContact::class);
     }
 
     public function officers(): HasMany

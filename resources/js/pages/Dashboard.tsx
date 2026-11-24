@@ -6,6 +6,7 @@ import {
     Landmark,
     ShieldCheck,
     Contact,
+    CreditCard,
     User,
     SlidersHorizontal,
     Tag,
@@ -45,6 +46,12 @@ const dashboardGroups = [
                 path: "/banks",
                 icon: Landmark,
                 module: "banks",
+            },
+            {
+                label: "Bank Accounts",
+                path: "/bank-accounts",
+                icon: CreditCard,
+                module: "person-accounts",
             },
             {
                 label: "Employee Types",

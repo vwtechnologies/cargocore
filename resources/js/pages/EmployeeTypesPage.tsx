@@ -555,8 +555,8 @@ export function EmployeeTypesPage() {
                                 <div>
                                     <p
                                         style={{
-                                            fontSize: "14px",
-                                            color: "#1f2937",
+                                            fontSize: "var(--text-base)",
+                                            color: "var(--ink)",
                                             margin: 0,
                                             fontWeight: 500,
                                         }}
@@ -565,8 +565,8 @@ export function EmployeeTypesPage() {
                                     </p>
                                     <p
                                         style={{
-                                            fontSize: "12px",
-                                            color: "#6b7280",
+                                            fontSize: "var(--text-sm)",
+                                            color: "var(--text-muted)",
                                             margin: "4px 0 0 0",
                                         }}
                                     >
@@ -589,10 +589,10 @@ export function EmployeeTypesPage() {
                                     onClick={() => setUnsavedPrompt(null)}
                                     style={{
                                         padding: "6px 14px",
-                                        fontSize: "13px",
-                                        color: "#374151",
+                                        fontSize: "var(--text-base)",
+                                        color: "var(--text-secondary)",
                                         background: "#ffffff",
-                                        border: "1px solid #d1d5db",
+                                        border: "1px solid var(--line-strong)",
                                         borderRadius: "6px",
                                         cursor: "pointer",
                                     }}
@@ -611,10 +611,10 @@ export function EmployeeTypesPage() {
                                     }}
                                     style={{
                                         padding: "6px 14px",
-                                        fontSize: "13px",
-                                        color: "#873d3d",
-                                        background: "#fee2e2",
-                                        border: "1px solid #fecaca",
+                                        fontSize: "var(--text-base)",
+                                        color: "var(--danger)",
+                                        background: "var(--danger-tint)",
+                                        border: "1px solid var(--danger-line)",
                                         borderRadius: "6px",
                                         cursor: "pointer",
                                     }}
@@ -636,9 +636,9 @@ export function EmployeeTypesPage() {
                                     }}
                                     style={{
                                         padding: "6px 14px",
-                                        fontSize: "13px",
+                                        fontSize: "var(--text-base)",
                                         color: "#ffffff",
-                                        background: "#3e6957",
+                                        background: "var(--brand)",
                                         border: "none",
                                         borderRadius: "6px",
                                         fontWeight: 600,

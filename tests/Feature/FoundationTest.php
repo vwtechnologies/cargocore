@@ -90,7 +90,7 @@ class FoundationTest extends ErpTestCase
         $city = $this->createRecord('countries/'.$country->id.'/cities', ['name' => 'Port City', 'code' => 'PORT01', 'short_name_1' => 'PC', 'short_name_2' => 'PORT', 'status' => true]);
         $bank = Bank::factory()->create();
         $person = Person::factory()->create();
-        $branch = $this->createRecord('banks/'.$bank->id.'/branches', ['name' => 'Main', 'city_id' => $city['id'], 'country_id' => $country->id, 'branch_code' => '0007', 'nift_code' => '0017', 'phone_numbers' => ['555-1212']]);
+        $branch = $this->createRecord('banks/'.$bank->id.'/branches', ['name' => 'Main', 'city_id' => $city['id'], 'country_id' => $country->id, 'branch_code' => '0007', 'nift_code' => '0017']);
         $account = ['bank_id' => $bank->id, 'country_id' => $country->id, 'city_id' => $city['id'], 'bank_branch_id' => $branch['id'], 'account_number' => '0000012007', 'account_title' => 'Port Customer', 'status' => true];
         $this->postJson('/api/v1/people/'.$person->id.'/accounts', array_replace($account, ['country_id' => $other->id]))->assertUnprocessable()->assertJsonValidationErrors('bank_branch_id');
         $this->postJson('/api/v1/people/'.$person->id.'/accounts', $account + ['iban' => 'PK00INVALID00000000000000'])->assertUnprocessable()->assertJsonValidationErrors('iban');

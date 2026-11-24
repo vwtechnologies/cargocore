@@ -4,7 +4,6 @@ import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import {
     ArrowLeft,
     Building2,
-    Phone,
     Plus,
     Pencil,
     Trash2,
@@ -23,6 +22,7 @@ import { toast } from "sonner";
 import { api, managementApi, params } from "../lib/api";
 import { RecordStatusAction } from "../components/Records";
 import { useSession } from "../lib/session";
+import { useDirty, useDirtyForm } from "../lib/dirty";
 import { useRecordShortcuts } from "../lib/record-shortcuts";
 import { PageActions } from "../components/PageActions";
 import { MobileRecordBrowser } from "../components/MobileRecordBrowser";
@@ -35,20 +35,15 @@ import {
     Loading,
     ErrorState,
     useDebounced,
-    SearchableSelect,
     StatusIndicator,
 } from "../components/ui";
 
-interface CompanyFormData {
-    name: string;
-    short_name: string;
-    address: string;
-    contact_number: string;
-    fax_number: string;
-    website: string;
-    status: boolean;
-    is_default: boolean;
-}
+import {
+    CompanyProfile,
+    companyValues,
+    emptyCompany,
+    type CompanyFormData,
+} from "./CompanyProfile";
 
 interface SubCompanyRowData {
     id?: number;
@@ -64,6 +59,7 @@ export function CompaniesPage() {
     const navigate = useNavigate();
     const { session } = useSession();
     const cache = useQueryClient();
+    const guard = useDirty();
 
     const [search, setSearch] = useState("");
     const [subSearch, setSubSearch] = useState("");
@@ -76,20 +72,18 @@ export function CompaniesPage() {
     const editVersion = useRef(0);
     const [isCreating, setIsCreating] = useState(false);
     const [formData, setFormData] = useState<CompanyFormData>({
-        name: "",
-        short_name: "",
-        address: "",
-        contact_number: "",
-        fax_number: "",
-        website: "",
-        status: true,
-        is_default: false,
+        ...emptyCompany,
     });
 
     const firstInputRef = useRef<HTMLInputElement | null>(null);
     const shortcutScope = useRef<HTMLDivElement>(null);
     const subShortcutScope = useRef<HTMLDivElement>(null);
     const initialCompanyForm = useRef(formData);
+    useDirtyForm(
+        (isEditing || isCreating) &&
+            JSON.stringify(formData) !==
+                JSON.stringify(initialCompanyForm.current),
+    );
     const lastSelectedSub = useRef<number | null>(null);
     const tableContainerRef = useRef<HTMLDivElement | null>(null);
     const listPanelRef = useRef<HTMLElement | null>(null);
@@ -121,57 +115,6 @@ export function CompaniesPage() {
         onSave: () => Promise<void> | void;
         onProceedUnsaved: () => void;
     } | null>(null);
-
-    // Country and City for Company Contact
-    const [companyCountryId, setCompanyCountryId] = useState<string | number>(
-        "1",
-    );
-    const [companyCityId, setCompanyCityId] = useState<string | number>("3");
-
-    const countriesQuery = useQuery({
-        queryKey: ["all-countries-lookup"],
-        queryFn: () =>
-            api<PageResult<RecordData>>("/api/v1/countries?per_page=100"),
-    });
-    const countries = useMemo(
-        () => countriesQuery.data?.data || [],
-        [countriesQuery.data?.data],
-    );
-
-    const countryOptions = useMemo(
-        () =>
-            countries.map((c) => ({
-                value: c.id,
-                label: String(c.name),
-                code: String(c.short_name || c.code || ""),
-            })),
-        [countries],
-    );
-
-    const citiesQuery = useQuery({
-        queryKey: ["company-cities-lookup", companyCountryId],
-        queryFn: () =>
-            api<PageResult<RecordData>>(
-                companyCountryId
-                    ? `/api/v1/countries/${companyCountryId}/cities?per_page=100`
-                    : `/api/v1/cities?per_page=100`,
-            ),
-        enabled: true,
-    });
-    const cities = useMemo(
-        () => citiesQuery.data?.data || [],
-        [citiesQuery.data?.data],
-    );
-
-    const cityOptions = useMemo(
-        () =>
-            cities.map((c) => ({
-                value: c.id,
-                label: String(c.name),
-                code: String(c.short_name_1 || c.code || ""),
-            })),
-        [cities],
-    );
 
     const newSubInputRef = useRef<HTMLInputElement | null>(null);
     const editNameInputRef = useRef<HTMLInputElement | null>(null);
@@ -270,18 +213,7 @@ export function CompaniesPage() {
     // Sync formData when selected company loads or changes
     useEffect(() => {
         if (selectedCompany && !isCreating && !isEditing) {
-            setFormData({
-                name: String(selectedCompany.name || ""),
-                short_name: String(
-                    selectedCompany.short_name || selectedCompany.code || "",
-                ),
-                address: String(selectedCompany.address || ""),
-                contact_number: String(selectedCompany.contact_number || ""),
-                fax_number: String(selectedCompany.fax_number || ""),
-                website: String(selectedCompany.website || ""),
-                status: selectedCompany.status !== false,
-                is_default: !!selectedCompany.is_default,
-            });
+            setFormData(companyValues(selectedCompany));
             setIsEditing(false);
         }
     }, [selectedCompany, isCreating, isEditing]);
@@ -324,40 +256,28 @@ export function CompaniesPage() {
 
     // Start inline create
     const handleStartCreate = () => {
+        if (!session.entities.companies.capabilities.create) return;
+        if (guard.dirty) {
+            toast.error(
+                "Save or cancel unsaved changes before creating a company.",
+            );
+            return;
+        }
         setIsCreating(true);
         setIsEditing(false);
-        const next: CompanyFormData = {
-            name: "",
-            short_name: "",
-            address: "",
-            contact_number: "",
-            fax_number: "",
-            website: "",
-            status: true,
-            is_default: false,
-        };
+        const next = { ...emptyCompany };
         initialCompanyForm.current = next;
         setFormData(next);
     };
 
     // Start inline edit
     const handleStartEdit = () => {
+        if (!session.entities.companies.capabilities.update) return;
         if (!selectedCompany) return;
         editVersion.current = selectedCompany!.version;
         setIsEditing(true);
         setIsCreating(false);
-        const next: CompanyFormData = {
-            name: String(selectedCompany.name || ""),
-            short_name: String(
-                selectedCompany.short_name || selectedCompany.code || "",
-            ),
-            address: String(selectedCompany.address || ""),
-            contact_number: String(selectedCompany.contact_number || ""),
-            fax_number: String(selectedCompany.fax_number || ""),
-            website: String(selectedCompany.website || ""),
-            status: selectedCompany.status !== false,
-            is_default: !!selectedCompany.is_default,
-        };
+        const next = companyValues(selectedCompany);
         initialCompanyForm.current = next;
         setFormData(next);
     };
@@ -378,18 +298,7 @@ export function CompaniesPage() {
         setIsEditing(false);
         setIsCreating(false);
         if (selectedCompany) {
-            setFormData({
-                name: String(selectedCompany.name || ""),
-                short_name: String(
-                    selectedCompany.short_name || selectedCompany.code || "",
-                ),
-                address: String(selectedCompany.address || ""),
-                contact_number: String(selectedCompany.contact_number || ""),
-                fax_number: String(selectedCompany.fax_number || ""),
-                website: String(selectedCompany.website || ""),
-                status: selectedCompany.status !== false,
-                is_default: !!selectedCompany.is_default,
-            });
+            setFormData(companyValues(selectedCompany));
         }
         tableContainerRef.current?.focus();
     };
@@ -399,6 +308,8 @@ export function CompaniesPage() {
         if (viewAllOpen) return;
 
         const target = e.target as HTMLElement | null;
+        if (target?.closest("[data-detail-record-region], [role=tablist]"))
+            return;
         const isInput =
             target?.tagName === "INPUT" ||
             target?.tagName === "TEXTAREA" ||
@@ -477,18 +388,9 @@ export function CompaniesPage() {
     const createCompanyMutation = useMutation({
         mutationFn: (data: CompanyFormData) => {
             const payload: Record<string, unknown> = {
-                name: data.name.trim(),
-                short_name: data.short_name.trim() || null,
-                address: data.address.trim() || null,
-                contact_number: data.contact_number.trim() || null,
-                fax_number: data.fax_number.trim() || null,
-                website:
-                    data.website.trim() &&
-                    data.website.trim().startsWith("http")
-                        ? data.website.trim()
-                        : null,
-                status: data.status,
-                is_default: data.is_default,
+                ...data,
+                parent_company_id: data.parent_company_id || null,
+                website: data.website.trim() || null,
             };
             return api<{ data: RecordData }>("/api/v1/companies", {
                 method: "POST",
@@ -514,18 +416,9 @@ export function CompaniesPage() {
     const updateCompanyMutation = useMutation({
         mutationFn: (data: CompanyFormData) => {
             const payload: Record<string, unknown> = {
-                name: data.name.trim(),
-                short_name: data.short_name.trim() || null,
-                address: data.address.trim() || null,
-                contact_number: data.contact_number.trim() || null,
-                fax_number: data.fax_number.trim() || null,
-                website:
-                    data.website.trim() &&
-                    data.website.trim().startsWith("http")
-                        ? data.website.trim()
-                        : null,
-                status: data.status,
-                is_default: data.is_default,
+                ...data,
+                parent_company_id: data.parent_company_id || null,
+                website: data.website.trim() || null,
                 version: editVersion.current,
             };
             return api<{ data: RecordData }>(
@@ -747,6 +640,12 @@ export function CompaniesPage() {
 
     // Navigation and unsaved prompt interception
     const attemptNavigation = (targetAction: () => void) => {
+        if (guard.dirty) {
+            toast.error(
+                "Save or cancel unsaved changes before switching records.",
+            );
+            return;
+        }
         if (isAddingSub && isNewSubRowDirty(newSubData)) {
             setUnsavedPrompt({
                 open: true,
@@ -929,10 +828,10 @@ export function CompaniesPage() {
         return allCompanies.filter((c) => {
             const name = String(c.name || "").toLowerCase();
             const code = String(c.short_name || c.code || "").toLowerCase();
-            const phone = String(c.contact_number || "").toLowerCase();
-            const fax = String(c.fax_number || "").toLowerCase();
+            const phone = String(c.primary_contact_number || "").toLowerCase();
+            const fax = String(c.ntn || "").toLowerCase();
             const website = String(c.website || "").toLowerCase();
-            const address = String(c.address || "").toLowerCase();
+            const address = String(c.primary_address || "").toLowerCase();
             return (
                 name.includes(q) ||
                 code.includes(q) ||
@@ -966,6 +865,12 @@ export function CompaniesPage() {
     };
 
     const handleSelectFromViewAll = (c: RecordData) => {
+        if (guard.dirty) {
+            toast.error(
+                "Save or cancel unsaved changes before switching records.",
+            );
+            return;
+        }
         setViewAllOpen(false);
         setIsEditing(false);
         setIsCreating(false);
@@ -985,13 +890,6 @@ export function CompaniesPage() {
             });
         }
     }, [highlightedIndex, viewAllOpen]);
-
-    const activeFormStatus =
-        isCreating || isEditing
-            ? formData.status
-            : selectedCompany
-              ? selectedCompany.status !== false
-              : true;
 
     const saveCurrentRecord = () => {
         if (isAddingSub) void handleSaveNewSub();
@@ -1026,16 +924,7 @@ export function CompaniesPage() {
               : isAddingSub
                 ? subCapabilities.create
                 : editingSubId !== null && subCapabilities.update,
-        onNew: () => {
-            if (
-                (isEditing || isCreating) &&
-                JSON.stringify(formData) !==
-                    JSON.stringify(initialCompanyForm.current) &&
-                !window.confirm("Discard unsaved changes?")
-            )
-                return;
-            attemptNavigation(handleStartCreate);
-        },
+        onNew: () => attemptNavigation(handleStartCreate),
         onEdit: () => attemptNavigation(handleStartEdit),
         onSave: saveCurrentRecord,
     });
@@ -1062,6 +951,12 @@ export function CompaniesPage() {
     // Enter key navigation to move to next field
     const handleEnterNav = (e: React.KeyboardEvent) => {
         if (e.key !== "Enter") return;
+        if (
+            (e.target as HTMLElement).closest(
+                "[data-detail-record-region], [role=tablist]",
+            )
+        )
+            return;
         const target = e.target as HTMLElement;
         if (!target) return;
         if (
@@ -1180,7 +1075,10 @@ export function CompaniesPage() {
                                 type="button"
                                 className="btn-company-delete"
                                 onClick={() => setDeletingCompany(true)}
-                                disabled={!selectedCompany}
+                                disabled={
+                                    !selectedCompany ||
+                                    !companyCapabilities.delete
+                                }
                             >
                                 <Trash2 size={15} />
                                 <span>Delete</span>
@@ -1487,360 +1385,24 @@ export function CompaniesPage() {
                                     </div>
                                 </div>
 
-                                {/* Card Body */}
                                 <div className="company-card-body">
-                                    {/* General Section */}
-                                    <div className="company-form-section">
-                                        <div className="company-section-header">
-                                            <div className="company-section-title-wrap">
-                                                <Building2
-                                                    size={15}
-                                                    className="company-section-icon"
-                                                />
-                                                <h4 className="company-section-eyebrow">
-                                                    General
-                                                </h4>
-                                            </div>
-                                        </div>
-                                        <div className="company-fields-grid company-general-grid">
-                                            <div className="company-field company-field-code">
-                                                <label htmlFor="company-code">
-                                                    Company Code{" "}
-                                                    <span className="req-star">
-                                                        *
-                                                    </span>
-                                                </label>
-                                                <input
-                                                    ref={firstInputRef}
-                                                    id="company-code"
-                                                    aria-label="Short name"
-                                                    type="text"
-                                                    readOnly={
-                                                        !isEditing &&
-                                                        !isCreating
-                                                    }
-                                                    value={
-                                                        isEditing || isCreating
-                                                            ? formData.short_name
-                                                            : String(
-                                                                  selectedCompany?.short_name ||
-                                                                      selectedCompany?.code ||
-                                                                      "",
-                                                              )
-                                                    }
-                                                    onChange={(e) =>
-                                                        setFormData((d) => ({
-                                                            ...d,
-                                                            short_name:
-                                                                e.target.value,
-                                                        }))
-                                                    }
-                                                    placeholder="e.g. CCL"
-                                                />
-                                            </div>
-
-                                            <div className="company-field company-field-name">
-                                                <label htmlFor="company-name">
-                                                    Company Name{" "}
-                                                    <span className="req-star">
-                                                        *
-                                                    </span>
-                                                </label>
-                                                <input
-                                                    id="company-name"
-                                                    aria-label="Name"
-                                                    type="text"
-                                                    readOnly={
-                                                        !isEditing &&
-                                                        !isCreating
-                                                    }
-                                                    value={
-                                                        isEditing || isCreating
-                                                            ? formData.name
-                                                            : String(
-                                                                  selectedCompany?.name ||
-                                                                      "",
-                                                              )
-                                                    }
-                                                    onChange={(e) =>
-                                                        setFormData((d) => ({
-                                                            ...d,
-                                                            name: e.target
-                                                                .value,
-                                                        }))
-                                                    }
-                                                    placeholder="Enter company name"
-                                                />
-                                            </div>
-
-                                            <div className="company-field company-field-tax">
-                                                <label htmlFor="company-tax">
-                                                    NTN / Tax No.
-                                                </label>
-                                                <input
-                                                    id="company-tax"
-                                                    aria-label="NTN / Tax No."
-                                                    type="text"
-                                                    readOnly={
-                                                        !isEditing &&
-                                                        !isCreating
-                                                    }
-                                                    value={
-                                                        isEditing || isCreating
-                                                            ? formData.fax_number
-                                                            : String(
-                                                                  selectedCompany?.fax_number ||
-                                                                      "4211-869",
-                                                              )
-                                                    }
-                                                    onChange={(e) =>
-                                                        setFormData((d) => ({
-                                                            ...d,
-                                                            fax_number:
-                                                                e.target.value,
-                                                        }))
-                                                    }
-                                                    placeholder="e.g. 4211-869"
-                                                />
-                                            </div>
-                                        </div>
-
-                                        <div className="company-default-controls">
-                                            <div className="company-toggle-row">
-                                                <span className="company-toggle-label">
-                                                    Active
-                                                </span>
-                                                <div className="company-toggle-switch">
-                                                    <button
-                                                        type="button"
-                                                        role="switch"
-                                                        aria-label="Company status"
-                                                        aria-checked={
-                                                            activeFormStatus
-                                                        }
-                                                        disabled={
-                                                            (!isEditing &&
-                                                                !isCreating) ||
-                                                            isSaving
-                                                        }
-                                                        className={`switch-track ${activeFormStatus ? "active" : ""} ${isEditing || isCreating ? "interactive" : ""}`}
-                                                        onClick={() =>
-                                                            setFormData(
-                                                                (current) => ({
-                                                                    ...current,
-                                                                    status: !current.status,
-                                                                }),
-                                                            )
-                                                        }
-                                                    >
-                                                        <span className="switch-knob" />
-                                                    </button>
-                                                    <span className="switch-text">
-                                                        {activeFormStatus
-                                                            ? "Active"
-                                                            : "Inactive"}
-                                                    </span>
-                                                </div>
-                                            </div>
-                                            <div className="company-toggle-row">
-                                                <span className="company-toggle-label">
-                                                    Set As Default
-                                                </span>
-                                                <div className="company-toggle-switch">
-                                                    <button
-                                                        type="button"
-                                                        role="switch"
-                                                        aria-label="Set as default company"
-                                                        aria-checked={
-                                                            isEditing ||
-                                                            isCreating
-                                                                ? formData.is_default
-                                                                : !!selectedCompany?.is_default
-                                                        }
-                                                        disabled={
-                                                            (!isEditing &&
-                                                                !isCreating) ||
-                                                            isSaving ||
-                                                            !activeFormStatus
-                                                        }
-                                                        className={`switch-track ${(isEditing || isCreating ? formData.is_default : selectedCompany?.is_default) ? "active" : ""} ${isEditing || isCreating ? "interactive" : ""}`}
-                                                        onClick={() =>
-                                                            setFormData(
-                                                                (current) => ({
-                                                                    ...current,
-                                                                    is_default:
-                                                                        !current.is_default,
-                                                                }),
-                                                            )
-                                                        }
-                                                    >
-                                                        <span className="switch-knob" />
-                                                    </button>
-                                                    <span className="switch-text">
-                                                        {(
-                                                            isEditing ||
-                                                            isCreating
-                                                                ? formData.is_default
-                                                                : selectedCompany?.is_default
-                                                        )
-                                                            ? "Default"
-                                                            : "Not default"}
-                                                    </span>
-                                                </div>
-                                            </div>
-                                        </div>
-                                    </div>
-
-                                    {/* Section Separator / Divider between General and Contact */}
-                                    <div className="company-section-separator" />
-
-                                    {/* Contact Section */}
-                                    <div className="company-form-section">
-                                        <div className="company-section-header">
-                                            <div className="company-section-title-wrap">
-                                                <Phone
-                                                    size={15}
-                                                    className="company-section-icon"
-                                                />
-                                                <h4 className="company-section-eyebrow">
-                                                    Contact
-                                                </h4>
-                                            </div>
-                                        </div>
-                                        <div className="company-fields-grid company-contact-grid">
-                                            <div className="company-field company-field-phone">
-                                                <label htmlFor="company-phone">
-                                                    Phone
-                                                </label>
-                                                <input
-                                                    id="company-phone"
-                                                    aria-label="Phone"
-                                                    type="text"
-                                                    readOnly={
-                                                        !isEditing &&
-                                                        !isCreating
-                                                    }
-                                                    value={
-                                                        isEditing || isCreating
-                                                            ? formData.contact_number
-                                                            : String(
-                                                                  selectedCompany?.contact_number ||
-                                                                      "+92 21 3456 7788",
-                                                              )
-                                                    }
-                                                    onChange={(e) =>
-                                                        setFormData((d) => ({
-                                                            ...d,
-                                                            contact_number:
-                                                                e.target.value,
-                                                        }))
-                                                    }
-                                                    placeholder="+92 21 3456 7788"
-                                                />
-                                            </div>
-
-                                            <div className="company-field company-field-email">
-                                                <label htmlFor="company-email">
-                                                    Email
-                                                </label>
-                                                <input
-                                                    id="company-email"
-                                                    aria-label="Email"
-                                                    type="text"
-                                                    readOnly={
-                                                        !isEditing &&
-                                                        !isCreating
-                                                    }
-                                                    value={
-                                                        isEditing || isCreating
-                                                            ? formData.website
-                                                            : String(
-                                                                  selectedCompany?.website ||
-                                                                      "info@cargocore.pk",
-                                                              )
-                                                    }
-                                                    onChange={(e) =>
-                                                        setFormData((d) => ({
-                                                            ...d,
-                                                            website:
-                                                                e.target.value,
-                                                        }))
-                                                    }
-                                                    placeholder="info@cargocore.pk"
-                                                />
-                                            </div>
-
-                                            <div className="company-field company-field-country">
-                                                <label>Country</label>
-                                                <SearchableSelect
-                                                    ariaLabel="Country"
-                                                    placeholder="Select Country"
-                                                    searchPlaceholder="Search country…"
-                                                    value={companyCountryId}
-                                                    onChange={(val) => {
-                                                        setCompanyCountryId(
-                                                            val,
-                                                        );
-                                                        setCompanyCityId("");
-                                                    }}
-                                                    options={countryOptions}
-                                                    readOnly={
-                                                        !isEditing &&
-                                                        !isCreating
-                                                    }
-                                                />
-                                            </div>
-
-                                            <div className="company-field company-field-city">
-                                                <label>City</label>
-                                                <SearchableSelect
-                                                    ariaLabel="City"
-                                                    placeholder="Select City"
-                                                    searchPlaceholder="Search city…"
-                                                    value={companyCityId}
-                                                    onChange={(val) =>
-                                                        setCompanyCityId(val)
-                                                    }
-                                                    options={cityOptions}
-                                                    readOnly={
-                                                        !isEditing &&
-                                                        !isCreating
-                                                    }
-                                                />
-                                            </div>
-
-                                            <div className="company-field company-field-address col-span-2">
-                                                <label htmlFor="company-address">
-                                                    Address
-                                                </label>
-                                                <textarea
-                                                    id="company-address"
-                                                    aria-label="Address"
-                                                    readOnly={
-                                                        !isEditing &&
-                                                        !isCreating
-                                                    }
-                                                    rows={1}
-                                                    value={
-                                                        isEditing || isCreating
-                                                            ? formData.address
-                                                            : String(
-                                                                  selectedCompany?.address ||
-                                                                      "Plot 12, West Wharf, Karachi",
-                                                              )
-                                                    }
-                                                    onChange={(e) =>
-                                                        setFormData((d) => ({
-                                                            ...d,
-                                                            address:
-                                                                e.target.value,
-                                                        }))
-                                                    }
-                                                    placeholder="Plot 12, West Wharf, Karachi"
-                                                />
-                                            </div>
-                                        </div>
-                                    </div>
+                                    <CompanyProfile
+                                        key={
+                                            isCreating
+                                                ? "new"
+                                                : selectedCompany?.id
+                                        }
+                                        company={
+                                            isCreating
+                                                ? undefined
+                                                : selectedCompany?.id
+                                        }
+                                        value={formData}
+                                        onChange={setFormData}
+                                        editable={isEditing || isCreating}
+                                        busy={isSaving}
+                                        firstInputRef={firstInputRef}
+                                    />
                                 </div>
                             </div>
 
@@ -2528,7 +2090,7 @@ export function CompaniesPage() {
                                                                             style={{
                                                                                 color: addressVal
                                                                                     ? "#1e362a"
-                                                                                    : "#9ca3af",
+                                                                                    : "var(--text-muted)",
                                                                             }}
                                                                         >
                                                                             {addressVal ||
@@ -2539,7 +2101,7 @@ export function CompaniesPage() {
                                                                             style={{
                                                                                 color: phoneVal
                                                                                     ? "#1e362a"
-                                                                                    : "#9ca3af",
+                                                                                    : "var(--text-muted)",
                                                                             }}
                                                                         >
                                                                             {phoneVal ||
@@ -2629,9 +2191,9 @@ export function CompaniesPage() {
                             </div>
                             <h3
                                 style={{
-                                    fontSize: "17px",
+                                    fontSize: "var(--text-lg)",
                                     fontWeight: 700,
-                                    color: "#0f2519",
+                                    color: "var(--ink)",
                                     marginBottom: "8px",
                                 }}
                             >
@@ -2639,8 +2201,8 @@ export function CompaniesPage() {
                             </h3>
                             <p
                                 style={{
-                                    color: "#6b7f75",
-                                    fontSize: "13.5px",
+                                    color: "var(--text-muted)",
+                                    fontSize: "var(--text-base)",
                                     maxWidth: "360px",
                                     margin: "0 auto 20px",
                                 }}
@@ -2825,8 +2387,8 @@ export function CompaniesPage() {
                                                 style={{
                                                     textAlign: "center",
                                                     padding: "40px",
-                                                    color: "#6b7f75",
-                                                    fontSize: "14px",
+                                                    color: "var(--text-muted)",
+                                                    fontSize: "var(--text-base)",
                                                 }}
                                             >
                                                 No companies found matching
@@ -2889,13 +2451,12 @@ export function CompaniesPage() {
                                                     </td>
                                                     <td data-label="NTN / TAX NO.">
                                                         {String(
-                                                            comp.fax_number ||
-                                                                "4211-869",
+                                                            comp.ntn || "—",
                                                         )}
                                                     </td>
                                                     <td data-label="PHONE">
                                                         {String(
-                                                            comp.contact_number ||
+                                                            comp.primary_contact_number ||
                                                                 "—",
                                                         )}
                                                     </td>
@@ -2912,7 +2473,8 @@ export function CompaniesPage() {
                                                         className="view-all-wide-cell"
                                                     >
                                                         {String(
-                                                            comp.address || "—",
+                                                            comp.primary_address ||
+                                                                "—",
                                                         )}
                                                     </td>
                                                     <td

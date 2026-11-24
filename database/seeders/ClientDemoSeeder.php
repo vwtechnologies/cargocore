@@ -92,7 +92,8 @@ class ClientDemoSeeder extends Seeder
                 $bank = Bank::create(['code' => 'BNK-CLIENT-'.($index + 1), 'name' => $name, 'short_name' => $short, 'country_id' => $pakistan->id, 'status' => $active, 'uan' => '111-000-'.str_pad((string) ($index + 1), 3, '0', STR_PAD_LEFT), 'website' => 'HTTPS://EXAMPLE.TEST']);
                 $banks[] = $bank;
                 foreach (array_slice($cities, 0, 2) as $cityIndex => $city) {
-                    $branches[] = BankBranch::create(['code' => 'BRN-CLIENT-'.$index.'-'.$cityIndex, 'bank_id' => $bank->id, 'city_id' => $city->id, 'name' => $city->name.' MAIN BRANCH', 'branch_code' => str_pad((string) ($index * 100 + $cityIndex + 1), 4, '0', STR_PAD_LEFT), 'nift_code' => str_pad((string) ($index * 10 + $cityIndex + 1), 5, '0', STR_PAD_LEFT), 'address' => 'DEMO COMMERCIAL AREA, '.$city->name, 'phone_numbers' => ['+92 51 5550100'], 'status' => $active]);
+                    $branches[] = BankBranch::create(['code' => 'BRN-CLIENT-'.$index.'-'.$cityIndex, 'bank_id' => $bank->id, 'city_id' => $city->id, 'name' => $city->name.' MAIN BRANCH', 'branch_code' => str_pad((string) ($index * 100 + $cityIndex + 1), 4, '0', STR_PAD_LEFT), 'nift_code' => str_pad((string) ($index * 10 + $cityIndex + 1), 5, '0', STR_PAD_LEFT), 'address' => 'DEMO COMMERCIAL AREA, '.$city->name, 'status' => $active]);
+                    end($branches)->contacts()->create(['title' => 'BRANCH LANDLINE', 'number' => '+92 51 5550100', 'is_primary' => $active, 'status' => true]);
                 }
             }
             $people = [];

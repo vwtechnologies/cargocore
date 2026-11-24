@@ -8,7 +8,7 @@ import {
 import { useLocation, useNavigate, useParams } from "react-router-dom";
 import { toast } from "sonner";
 import { MasterDetailShell } from "../components/MasterDetailShell";
-import { ChildSection } from "../components/Records";
+import { ChildSection, RecordDetails } from "../components/Records";
 import { Badge, ErrorState, Loading, useDebounced } from "../components/ui";
 import {
     Building2,
@@ -409,12 +409,24 @@ export function PeoplePage() {
                                 parent={{ entity: "people", id: person.id }}
                                 title="Marka"
                             />
-                        ) : tab === "accounts" ? (
-                            <section className="company-card coming-soon">
-                                <CreditCard size={32} />
-                                <h2>Coming Soon</h2>
-                                <p>Bank Accounts</p>
-                            </section>
+                        ) : person && tab === "accounts" ? (
+                            <ChildSection
+                                key={person.id}
+                                entity="accounts"
+                                parent={{ entity: "people", id: person.id }}
+                                title="Bank Accounts"
+                            >
+                                {(account) => (
+                                    <RecordDetails
+                                        entity="accounts"
+                                        parent={{
+                                            entity: "people",
+                                            id: person.id,
+                                        }}
+                                        record={account}
+                                    />
+                                )}
+                            </ChildSection>
                         ) : person && tab === "access" ? (
                             <PersonAccount
                                 key={person.id}

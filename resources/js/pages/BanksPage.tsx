@@ -27,6 +27,7 @@ import {
     type ViewAllColumn,
 } from "../components/MasterDetailShell";
 import { ReferenceSelect } from "../components/ReferenceSelect";
+import { RelatedDetailTable } from "../components/RelatedDetailTable";
 import {
     Badge,
     Confirm,
@@ -40,12 +41,21 @@ import {
 type BankValues = {
     name: string;
     short_name: string;
+    bank_code: string;
+    swift_code: string;
     country_id: number | null;
     uan: string;
     help_line: string;
+    contact_number: string;
     e_bank: string;
     website: string;
+    internet_banking_url: string;
+    corporate_banking_url: string;
     address: string;
+    trade_hub_name: string;
+    trade_hub_contact: string;
+    trade_hub_email: string;
+    trade_hub_address: string;
     status: boolean;
 };
 type BranchValues = {
@@ -53,7 +63,9 @@ type BranchValues = {
     city_id: number | null;
     branch_code: string;
     nift_code: string;
-    phones: string;
+    primary_contact_number: string;
+    email: string;
+    portal_url: string;
     address: string;
     status: boolean;
 };
@@ -71,12 +83,21 @@ type Editor<T> = { record?: RecordData; values: T; original: T };
 const bankValues = (record?: RecordData): BankValues => ({
     name: String(record?.name ?? ""),
     short_name: String(record?.short_name ?? ""),
+    bank_code: String(record?.bank_code ?? ""),
+    swift_code: String(record?.swift_code ?? ""),
     country_id: record?.country_id ? Number(record.country_id) : null,
     uan: String(record?.uan ?? ""),
     help_line: String(record?.help_line ?? ""),
+    contact_number: String(record?.contact_number ?? ""),
     e_bank: String(record?.e_bank ?? ""),
     website: String(record?.website ?? ""),
+    internet_banking_url: String(record?.internet_banking_url ?? ""),
+    corporate_banking_url: String(record?.corporate_banking_url ?? ""),
     address: String(record?.address ?? ""),
+    trade_hub_name: String(record?.trade_hub_name ?? ""),
+    trade_hub_contact: String(record?.trade_hub_contact ?? ""),
+    trade_hub_email: String(record?.trade_hub_email ?? ""),
+    trade_hub_address: String(record?.trade_hub_address ?? ""),
     status: record?.status ?? true,
 });
 const branchValues = (record?: RecordData): BranchValues => ({
@@ -84,9 +105,9 @@ const branchValues = (record?: RecordData): BranchValues => ({
     city_id: record?.city_id ? Number(record.city_id) : null,
     branch_code: String(record?.branch_code ?? ""),
     nift_code: String(record?.nift_code ?? ""),
-    phones: Array.isArray(record?.phone_numbers)
-        ? record.phone_numbers.join(", ")
-        : "",
+    primary_contact_number: String(record?.primary_contact_number ?? ""),
+    email: String(record?.email ?? ""),
+    portal_url: String(record?.portal_url ?? ""),
     address: String(record?.address ?? ""),
     status: record?.status ?? true,
 });
@@ -467,11 +488,10 @@ export function BanksPage() {
                             ? 2000
                             : key === "name" ||
                                 key === "designation" ||
-                                key === "email"
+                                key === "email" ||
+                                key === "portal_url"
                               ? 255
-                              : key === "phones"
-                                ? 1500
-                                : 50
+                              : 50
                     }
                     onChange={(event) => change(key, event.target.value)}
                 />
@@ -512,7 +532,22 @@ export function BanksPage() {
         },
         textColumn("branch_code", "Branch Code", "110px"),
         textColumn("nift_code", "NIFT Code", "110px"),
-        textColumn("phones", "Branch Phone Numbers", "160px"),
+        {
+            key: "primary_contact_number",
+            label: "Primary Contact",
+            width: "170px",
+            render: (record) => String(record.primary_contact_number || "—"),
+            editor: (value) => (
+                <span
+                    className="muted"
+                    title="Add or edit numbers under Contact Numbers below"
+                >
+                    {value.primary_contact_number || "—"}
+                </span>
+            ),
+        },
+        textColumn("email", "Branch Email", "200px", "email"),
+        textColumn("portal_url", "Branch Portal URL", "200px", "url"),
         textColumn("address", "Branch Address", "170px"),
         {
             key: "status",
@@ -741,6 +776,18 @@ export function BanksPage() {
                                                 "text",
                                                 50,
                                             ],
+                                            [
+                                                "bank_code",
+                                                "Bank Code",
+                                                "text",
+                                                20,
+                                            ],
+                                            [
+                                                "swift_code",
+                                                "SWIFT Code",
+                                                "text",
+                                                11,
+                                            ],
                                             ["uan", "UAN", "tel", 50],
                                             [
                                                 "help_line",
@@ -748,8 +795,31 @@ export function BanksPage() {
                                                 "tel",
                                                 50,
                                             ],
+                                            [
+                                                "contact_number",
+                                                "Contact Number",
+                                                "tel",
+                                                50,
+                                            ],
                                             ["e_bank", "E-Bank", "text", 255],
-                                            ["website", "Website", "url", 255],
+                                            [
+                                                "website",
+                                                "Main Website",
+                                                "url",
+                                                255,
+                                            ],
+                                            [
+                                                "internet_banking_url",
+                                                "Internet Banking URL",
+                                                "url",
+                                                255,
+                                            ],
+                                            [
+                                                "corporate_banking_url",
+                                                "Corporate Banking Portal URL",
+                                                "url",
+                                                255,
+                                            ],
                                         ] as const
                                     ).map(([key, label, type, maxLength]) => (
                                         <Field
@@ -773,7 +843,7 @@ export function BanksPage() {
                                                 readOnly={!bankEditor}
                                                 required={key === "name"}
                                                 placeholder={
-                                                    key === "website"
+                                                    type === "url"
                                                         ? "https://example.com"
                                                         : undefined
                                                 }
@@ -838,6 +908,62 @@ export function BanksPage() {
                                             changeBank("status", value)
                                         }
                                     />
+                                </div>
+                                <h3 className="bank-form-subheading">
+                                    Centralized Trade Hub
+                                </h3>
+                                <div className="bank-fields-grid">
+                                    {(
+                                        [
+                                            [
+                                                "trade_hub_name",
+                                                "Trade Hub Name",
+                                                "text",
+                                                255,
+                                            ],
+                                            [
+                                                "trade_hub_contact",
+                                                "Trade Hub Contact",
+                                                "tel",
+                                                50,
+                                            ],
+                                            [
+                                                "trade_hub_email",
+                                                "Trade Hub Email",
+                                                "email",
+                                                255,
+                                            ],
+                                            [
+                                                "trade_hub_address",
+                                                "Trade Hub Address",
+                                                "text",
+                                                5000,
+                                            ],
+                                        ] as const
+                                    ).map(([key, label, type, maxLength]) => (
+                                        <Field
+                                            key={key}
+                                            label={label}
+                                            htmlFor={`bank-${key}`}
+                                            error={bankErrors[key]}
+                                        >
+                                            <input
+                                                id={`bank-${key}`}
+                                                aria-label={label}
+                                                type={type}
+                                                maxLength={maxLength}
+                                                value={values[key]}
+                                                readOnly={!bankEditor}
+                                                aria-invalid={!!bankErrors[key]}
+                                                onChange={(event) =>
+                                                    changeBank(
+                                                        key,
+                                                        event.target.value,
+                                                    )
+                                                }
+                                            />
+                                        </Field>
+                                    ))}
                                 </div>
                                 {bankEditor && (
                                     <MutationError error={saveBank.error} />
@@ -957,8 +1083,11 @@ export function BanksPage() {
                                                 record,
                                                 patch,
                                             ) => {
-                                                const { phones, ...fields } =
-                                                    value;
+                                                const {
+                                                    primary_contact_number:
+                                                        _primary,
+                                                    ...fields
+                                                } = value;
                                                 const response = await api<{
                                                     data: RecordData;
                                                 }>(
@@ -971,20 +1100,6 @@ export function BanksPage() {
                                                             ...fields,
                                                             country_id:
                                                                 countryId,
-                                                            phone_numbers:
-                                                                phones
-                                                                    .split(
-                                                                        /[,;\n]/,
-                                                                    )
-                                                                    .map(
-                                                                        (
-                                                                            phone,
-                                                                        ) =>
-                                                                            phone.trim(),
-                                                                    )
-                                                                    .filter(
-                                                                        Boolean,
-                                                                    ),
                                                             ...(record
                                                                 ? {
                                                                       version:
@@ -1007,6 +1122,29 @@ export function BanksPage() {
                                         />
                                     )}
                                 </section>
+                                {selectedBranch &&
+                                    !!session.entities["branch-contacts"]
+                                        ?.capabilities.view && (
+                                        <section
+                                            className="company-card branch-contacts-card"
+                                            aria-label="Branch contact numbers"
+                                        >
+                                            <RelatedDetailTable
+                                                key={selectedBranch.id}
+                                                entity="branch-contacts"
+                                                title={`Contact Numbers · ${String(selectedBranch.name)}`}
+                                                parent={{
+                                                    entity: "branches",
+                                                    id: selectedBranch.id,
+                                                }}
+                                                filters={{}}
+                                                createDefaults={{
+                                                    status: true,
+                                                }}
+                                                onSelect={() => {}}
+                                            />
+                                        </section>
+                                    )}
                                 <section
                                     className="company-card"
                                     aria-label="Branch officers"

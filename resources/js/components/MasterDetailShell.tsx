@@ -72,6 +72,8 @@ export interface MasterDetailShellProps<T extends RecordData = RecordData> {
     onSearchChange: (value: string) => void;
     searchAriaLabel?: string;
     searchPlaceholder?: string;
+    /** Optional filter controls shown between the search box and the list. */
+    listFilters?: React.ReactNode;
 
     // Pagination
     page: number;
@@ -128,6 +130,7 @@ export function MasterDetailShell<T extends RecordData = RecordData>({
     onSearchChange,
     searchAriaLabel = "Search records",
     searchPlaceholder = "Search records…",
+    listFilters,
 
     page,
     lastPage,
@@ -524,6 +527,7 @@ export function MasterDetailShell<T extends RecordData = RecordData>({
                             aria-label={searchAriaLabel}
                         />
                     </div>
+                    {listFilters}
 
                     <div
                         className="company-table-container"
@@ -580,7 +584,7 @@ export function MasterDetailShell<T extends RecordData = RecordData>({
                                             style={{
                                                 textAlign: "center",
                                                 padding: "30px",
-                                                color: "#6b7280",
+                                                color: "var(--text-muted)",
                                             }}
                                         >
                                             {emptyText}
@@ -810,8 +814,9 @@ export function MasterDetailShell<T extends RecordData = RecordData>({
                                                 style={{
                                                     textAlign: "center",
                                                     padding: "40px",
-                                                    color: "#6b7f75",
-                                                    fontSize: "14px",
+                                                    color: "var(--text-muted)",
+                                                    fontSize:
+                                                        "var(--text-base)",
                                                 }}
                                             >
                                                 No records found matching

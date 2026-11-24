@@ -50,7 +50,7 @@ class GenerateContracts extends Command
             $schemas[$name] = ['type' => 'object', 'properties' => array_merge(['id' => ['type' => 'integer', 'readOnly' => true], 'version' => ['type' => 'integer'], 'created_at' => ['type' => 'string', 'format' => 'date-time', 'readOnly' => true], 'updated_at' => ['type' => 'string', 'format' => 'date-time', 'readOnly' => true]], $properties), 'required' => array_values(array_unique(['id', 'version', 'status', ...$required]))];
             $schemas[$name.'Input'] = ['type' => 'object', 'properties' => array_filter($properties, fn ($p) => ! ($p['readOnly'] ?? false)), 'required' => $writeRequired];
             $derived = match ($entity) {
-                'branches' => ['country_name', 'city_name'],'officers' => ['person_name', 'branch_name'],'accounts' => ['country_name', 'city_name', 'bank_name', 'branch_name'],'associations' => ['company_name'],'classifications' => ['business_type_name'],'person-markas' => ['marka_code', 'marka_description'],default => []
+                'companies' => ['primary_contact_number', 'primary_email', 'primary_address'], 'company-addresses' => ['name'], 'branches' => ['country_name', 'city_name', 'primary_contact_number'],'officers' => ['person_name', 'branch_name'],'accounts', 'bank-accounts' => ['country_name', 'city_name', 'bank_name', 'bank_code', 'branch_name', 'branch_code', 'company_name', 'company_address_title', 'company_address', 'person_name'],'associations' => ['company_name'],'classifications' => ['business_type_name'],'person-markas' => ['marka_code', 'marka_description'],default => []
             };
             foreach ($derived as $field) {
                 $schemas[$name]['properties'][$field] = ['type' => ['string', 'null'], 'readOnly' => true];

@@ -12,13 +12,16 @@ class VisibleRecords
     {
         $query->where($query->getModel()->qualifyColumn('status'), true);
         $required = match ($entity) {
+            'company-contacts', 'company-emails', 'company-addresses', 'company-owners' => ['company' => 'companies'],
             'sub-companies' => ['company' => 'companies'],
             'cities' => ['country' => 'countries'],
             'branches' => ['bank' => 'banks', 'city' => 'cities'],
             'officers' => ['bank' => 'banks', 'person' => 'people'],
+            'branch-contacts' => ['branch' => 'branches'],
             'contacts' => ['person' => 'people'],
             'person-markas' => ['person' => 'people', 'marka' => 'markas'],
             'accounts' => ['person' => 'people', 'branch' => 'branches'],
+            'bank-accounts' => ['branch' => 'branches'],
             'associations' => ['person' => 'people', 'company' => 'companies'],
             'classifications' => ['association' => 'associations', 'businessType' => 'business-types'],
             default => [],
