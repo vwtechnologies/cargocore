@@ -10,7 +10,6 @@ use App\Modules\Access\Access;
 use App\Modules\Shared\Audit;
 use App\Modules\Shared\DomainRules;
 use App\Modules\Shared\EntityRegistry;
-use App\Modules\Shared\UppercaseData;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
@@ -106,11 +105,6 @@ class AccessController extends Controller
 
             return ['data' => $page->getCollection()->map(fn (User $u) => $this->userData($u)), 'meta' => ['current_page' => $page->currentPage(), 'last_page' => $page->lastPage(), 'total' => $page->total()]];
         }
-        $r->merge([
-            'name' => UppercaseData::text($r->input('name')),
-            'username' => UppercaseData::text($r->input('username')),
-            'email' => UppercaseData::text($r->input('email')),
-        ]);
         $data = $r->validate(['name' => 'required|string|max:255', 'username' => ['required', 'string', 'max:80', 'regex:/^[a-zA-Z0-9_.-]+$/', Rule::unique('users')->ignore($id)], 'email' => ['nullable', 'email:rfc', 'max:255', Rule::unique('users')->ignore($id)],
             'person_id' => ['nullable', 'integer', Rule::exists('people', 'id')->whereNull('deleted_at'), Rule::unique('users', 'person_id')->ignore($id)], 'role_id' => ['required', 'integer', Rule::exists('roles', 'id')->whereNull('deleted_at')->where('status', true)],
             'company_ids' => 'present|array', 'company_ids.*' => ['integer', 'distinct', Rule::exists('companies', 'id')->whereNull('deleted_at')->where('status', true)], 'status' => 'required|boolean',
@@ -188,9 +182,6 @@ class AccessController extends Controller
         }
         Access::authorize($actor, 'roles', $id ? 'update' : 'create');
         $existing = $id ? Role::findOrFail($id) : null;
-        if (! $existing?->is_system) {
-            $r->merge(['name' => UppercaseData::text($r->input('name'))]);
-        }
         $data = $r->validate(['name' => ['required', 'string', 'max:100', Rule::unique('roles')->ignore($id)], 'status' => 'required|boolean', 'permissions' => 'present|array', 'permissions.*' => ['string', 'distinct', Rule::in(EntityRegistry::permissions())], 'version' => $id ? 'required|integer' : 'nullable|integer']);
 
         return DB::transaction(function () use ($data, $id) {

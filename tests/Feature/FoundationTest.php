@@ -57,7 +57,7 @@ class FoundationTest extends ErpTestCase
 
         $existing = EmployeeType::factory()->create(['code' => 'LEGACY-TYPE', 'description' => 'Retained legacy description']);
         $this->putJson('/api/v1/employee-types/'.$existing->id, ['name' => 'Updated employee type', 'status' => false, 'version' => 1, 'code' => 'REPLACED', 'description' => null, 'type_number' => 999])
-            ->assertOk()->assertJsonPath('data.name', 'UPDATED EMPLOYEE TYPE')->assertJsonPath('data.status', false)
+            ->assertOk()->assertJsonPath('data.name', 'Updated employee type')->assertJsonPath('data.status', false)
             ->assertJsonPath('data.code', 'LEGACY-TYPE')->assertJsonPath('data.description', 'Retained legacy description')->assertJsonPath('data.type_number', $existing->type_number);
         $this->getJson('/api/v1/employee-types/'.$existing->id)->assertNotFound();
         $this->getJson('/api/v1/employee-types/'.$existing->id.'?context=management')->assertOk();

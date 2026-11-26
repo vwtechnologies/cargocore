@@ -252,9 +252,7 @@ export function RolesPage() {
                                             mode !== "create")
                                     }
                                     onChange={(event) =>
-                                        setName(
-                                            event.target.value.toUpperCase(),
-                                        )
+                                        setName(event.target.value)
                                     }
                                 />
                             </div>

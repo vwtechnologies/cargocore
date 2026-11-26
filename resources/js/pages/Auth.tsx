@@ -65,7 +65,7 @@ export function Login() {
                             autoFocus
                             value={username}
                             onChange={(event) =>
-                                setUsername(event.target.value.toUpperCase())
+                                setUsername(event.target.value)
                             }
                             required
                         />

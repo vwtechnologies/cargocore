@@ -6,7 +6,6 @@ use App\Http\Controllers\Controller;
 use App\Models\Document;
 use App\Modules\Access\Access;
 use App\Modules\Shared\Audit;
-use App\Modules\Shared\UppercaseData;
 use App\Modules\Shared\VisibleRecords;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
@@ -41,7 +40,6 @@ class DocumentController extends Controller
                 return response()->noContent();
             });
         }
-        $r->merge(['document_type' => UppercaseData::text($r->input('document_type')), 'document_number' => UppercaseData::text($r->input('document_number'))]);
         $data = $r->validate(['kind' => ['required', Rule::in(['identification', 'profile', 'signature'])], 'document_type' => 'nullable|string|max:100', 'document_number' => 'nullable|string|max:100', 'expires_on' => 'nullable|date_format:Y-m-d',
             'file' => ['required', 'file', 'max:10240', 'mimes:jpg,jpeg,png,webp,pdf'], 'version' => $id ? 'required|integer' : 'nullable|integer']);
         $file = $r->file('file');

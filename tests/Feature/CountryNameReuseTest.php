@@ -49,7 +49,7 @@ class CountryNameReuseTest extends ErpTestCase
         $deleted = Country::factory()->create(['name' => 'United Kingdom']);
         $deleted->delete();
         $country = Country::factory()->create(['name' => 'Britain']);
-        $this->putJson('/api/v1/countries/'.$country->id, ['name' => 'United Kingdom', 'short_name' => 'UK', 'version' => $country->fresh()->version])->assertOk()->assertJsonPath('data.name', 'UNITED KINGDOM');
+        $this->putJson('/api/v1/countries/'.$country->id, ['name' => 'United Kingdom', 'short_name' => 'UK', 'version' => $country->fresh()->version])->assertOk()->assertJsonPath('data.name', 'United Kingdom');
         $this->assertSoftDeleted($deleted);
     }
 

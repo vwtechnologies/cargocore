@@ -35,7 +35,6 @@ import {
     Check,
 } from "./icons";
 import { useDirty } from "../lib/dirty";
-import { uppercaseBusinessInput } from "../lib/uppercase-input";
 import { useSession } from "../lib/session";
 import { api, params } from "../lib/api";
 import type { PageResult } from "../lib/types";
@@ -237,8 +236,6 @@ export function Shell() {
         <div
             className="app-shell"
             data-mobile-page-heading={mobilePageTitle ? "" : undefined}
-            onInputCapture={uppercaseBusinessInput}
-            onCompositionEndCapture={uppercaseBusinessInput}
         >
             {/* Top Navigation Bar Header */}
             <header className="topbar-header">

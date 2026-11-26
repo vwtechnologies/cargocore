@@ -305,11 +305,11 @@ export function CompanyProfile({
                         />
                         <datalist id="company-type-options">
                             {[
-                                "PRIVATE LIMITED",
-                                "PUBLIC LIMITED",
-                                "PARTNERSHIP",
-                                "SOLE PROPRIETORSHIP",
-                                "OTHER",
+                                "Private Limited",
+                                "Public Limited",
+                                "Partnership",
+                                "Sole Proprietorship",
+                                "Other",
                             ].map((type) => (
                                 <option key={type} value={type} />
                             ))}

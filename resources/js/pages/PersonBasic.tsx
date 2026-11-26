@@ -35,12 +35,21 @@ type EmployeeResponse = {
     eligible: boolean;
 };
 type EmployeeDraft = { types: number[]; original: number[]; version: number };
+const genderOptions = ["Male", "Female"];
+/** Shows legacy values such as "MALE" as the matching option ("Male"). */
+function canonicalGender(value: string): string {
+    return (
+        genderOptions.find(
+            (option) => option.toLowerCase() === value.toLowerCase(),
+        ) ?? value
+    );
+}
 function fields(person?: RecordData) {
     return Object.fromEntries(
         Object.entries(empty).map(([key, fallback]) => [
             key,
             key === "gender"
-                ? String(person?.[key] ?? "").toUpperCase()
+                ? canonicalGender(String(person?.[key] ?? ""))
                 : key === "date_of_birth"
                   ? String(person?.[key] ?? "").slice(0, 10)
                   : (person?.[key] ?? fallback),
@@ -275,12 +284,10 @@ export function PersonBasic({
                                                     Select gender
                                                 </option>
                                                 {[
-                                                    "MALE",
-                                                    "FEMALE",
+                                                    ...genderOptions,
                                                     ...(![
                                                         "",
-                                                        "MALE",
-                                                        "FEMALE",
+                                                        ...genderOptions,
                                                     ].includes(
                                                         String(form.gender),
                                                     )

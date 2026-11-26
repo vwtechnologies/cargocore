@@ -5,7 +5,6 @@ namespace App\Console\Commands;
 use App\Models\Role;
 use App\Models\User;
 use App\Modules\Shared\Audit;
-use App\Modules\Shared\UppercaseData;
 use Illuminate\Console\Command;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Validation\Rules\Password;
@@ -18,8 +17,8 @@ class CreateAdministrator extends Command
 
     public function handle(): int
     {
-        $username = UppercaseData::text($this->option('username') ?: $this->ask('Username'));
-        $name = UppercaseData::text($this->option('name') ?: $this->ask('Full name'));
+        $username = $this->option('username') ?: $this->ask('Username');
+        $name = $this->option('name') ?: $this->ask('Full name');
         $password = $this->input->isInteractive() ? $this->secret('Password (12+ characters, letters and numbers)') : trim(stream_get_contents(STDIN));
         $validator = Validator::make(compact('username', 'name', 'password'), ['username' => 'required|string|max:80|alpha_dash|unique:users', 'name' => 'required|string|max:255', 'password' => ['required', Password::min(12)->letters()->numbers()]]);
         if ($validator->fails()) {

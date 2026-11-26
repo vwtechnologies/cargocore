@@ -20,8 +20,8 @@ class CompanyManagementTest extends ErpTestCase
         $admin->companies()->attach($loginCompany);
         $parent = Company::factory()->create();
         $company = $this->createRecord('companies', ['name' => 'Legal company', 'short_name' => 'LC', 'type' => 'Private limited', 'parent_company_id' => $parent->id, 'ntn' => 'ntn-12', 'strn' => 'strn-34', 'weboc_id' => 'weboc-56', 'psw_id' => 'psw-78']);
-        $this->assertSame('LEGAL COMPANY', $company['name']);
-        $this->assertSame('WEBOC-56', $company['weboc_id']);
+        $this->assertSame('Legal company', $company['name']);
+        $this->assertSame('weboc-56', $company['weboc_id']);
         $this->assertSame($parent->id, $company['parent_company_id']);
         $this->assertSame([$loginCompany->id], $admin->companies()->pluck('companies.id')->all());
         $this->assertDatabaseCount('person_companies', 0);
@@ -70,7 +70,7 @@ class CompanyManagementTest extends ErpTestCase
         $saved = $this->postJson($url, ['title' => 'Bank letters', 'address_line_1' => 'Local office', 'country_id' => $city->country_id, 'city_id' => $city->id])->assertCreated()->json('data');
         $this->putJson("$url/{$saved['id']}", ['title' => 'Bank letters', 'address_line_1' => 'Local office', 'country_id' => $country->id, 'version' => $saved['version']])->assertUnprocessable()->assertJsonValidationErrors('city_id');
         CompanyAddress::factory()->create();
-        $this->getJson("/api/v1/company-addresses?context=lookup&company_id={$company->id}")->assertOk()->assertJsonCount(1, 'data')->assertJsonPath('data.0.id', $saved['id'])->assertJsonPath('data.0.name', 'BANK LETTERS — LOCAL OFFICE');
+        $this->getJson("/api/v1/company-addresses?context=lookup&company_id={$company->id}")->assertOk()->assertJsonCount(1, 'data')->assertJsonPath('data.0.id', $saved['id'])->assertJsonPath('data.0.name', 'Bank letters — Local office');
     }
 
     public function test_owners_fill_identity_from_people_and_validate_percentage_totals(): void
@@ -82,7 +82,7 @@ class CompanyManagementTest extends ErpTestCase
         $owner = $this->postJson($url, ['person_id' => $person->id, 'name' => 'Ignored', 'cnic' => '9999999999999', 'designation' => 'Director', 'ownership_percentage' => '60.50'])->assertCreated()->json('data');
         $this->assertSame($person->name, $owner['name']);
         $this->assertSame($person->cnic, $owner['cnic']);
-        $this->assertSame('DIRECTOR', $owner['designation']);
+        $this->assertSame('Director', $owner['designation']);
         $this->postJson($url, ['person_id' => $person->id])->assertUnprocessable()->assertJsonValidationErrors('person_id');
         foreach (['-1', '101', '39.51'] as $percent) {
             $this->postJson($url, ['name' => 'Another owner', 'ownership_percentage' => $percent])->assertUnprocessable()->assertJsonValidationErrors('ownership_percentage');

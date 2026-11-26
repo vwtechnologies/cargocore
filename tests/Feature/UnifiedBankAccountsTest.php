@@ -32,7 +32,7 @@ class UnifiedBankAccountsTest extends ErpTestCase
         $this->assertSame('0451', $account['branch_code']);
         $this->assertSame('REGISTERED BUSINESS ADDRESS (NTN)', $account['company_address_title']);
         $this->assertSame('3520212345671', $account['authorized_signatory_cnic']);
-        $this->assertSame('CURRENT', $account['account_type']);
+        $this->assertSame('Current', $account['account_type']);
         $this->assertSame('1500.50', $account['opening_balance']);
         $this->getJson('/api/v1/bank-accounts?is_our_account=1&context=management')->assertOk()->assertJsonCount(1, 'data');
         $this->getJson('/api/v1/bank-accounts?is_beneficiary=1&context=management')->assertOk()->assertJsonCount(0, 'data');
@@ -61,9 +61,9 @@ class UnifiedBankAccountsTest extends ErpTestCase
         $bank = $branch->bank->refresh();
         $branch->refresh();
         $this->putJson("/api/v1/banks/{$bank->id}", ['name' => $bank->name, 'country_id' => $branch->city->country_id, 'swift_code' => 'habbpkka', 'bank_code' => 'habb', 'contact_number' => '111-111-111', 'internet_banking_url' => 'https://ib.example.test', 'corporate_banking_url' => 'https://corp.example.test', 'trade_hub_name' => 'Trade hub', 'trade_hub_address' => 'Hub address', 'version' => $bank->version])
-            ->assertOk()->assertJsonPath('data.swift_code', 'HABBPKKA')->assertJsonPath('data.trade_hub_name', 'TRADE HUB');
+            ->assertOk()->assertJsonPath('data.swift_code', 'habbpkka')->assertJsonPath('data.trade_hub_name', 'Trade hub');
         $this->putJson("/api/v1/banks/{$bank->id}/branches/{$branch->id}", ['name' => $branch->name, 'city_id' => $branch->city_id, 'email' => 'branch@example.test', 'portal_url' => 'https://branch.example.test', 'version' => $branch->version])
-            ->assertOk()->assertJsonPath('data.email', 'BRANCH@EXAMPLE.TEST');
+            ->assertOk()->assertJsonPath('data.email', 'branch@example.test');
     }
 
     public function test_branch_contact_numbers_are_titled_rows_with_one_primary(): void
@@ -76,7 +76,7 @@ class UnifiedBankAccountsTest extends ErpTestCase
         }
         $this->getJson("/api/v1/branches/{$branch->id}/branch-contacts?context=management&per_page=25")->assertOk()->assertJsonCount(6, 'data');
         $this->assertSame(1, BankBranchContact::where('bank_branch_id', $branch->id)->where('is_primary', true)->count());
-        $this->assertSame('LANDLINE 2', BankBranchContact::where('is_primary', true)->value('title'));
+        $this->assertSame('Landline 2', BankBranchContact::where('is_primary', true)->value('title'));
         $this->getJson("/api/v1/banks/{$branch->bank_id}/branches/{$branch->id}")->assertOk()->assertJsonPath('data.primary_contact_number', '051-5550001');
         $this->postJson("/api/v1/branches/{$branch->id}/branch-contacts", ['title' => 'Untitled'])->assertUnprocessable()->assertJsonValidationErrors('number');
         $this->deleteJson("/api/v1/banks/{$branch->bank_id}/branches/{$branch->id}", ['version' => $branch->refresh()->version])->assertUnprocessable();

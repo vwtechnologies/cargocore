@@ -60,7 +60,7 @@ class BusinessAccessTest extends ErpTestCase
             'version' => 0, 'classification_versions' => [], 'items' => [['business_type_id' => $employee->id, 'opening_balance' => '123.45']],
         ])->assertOk()->assertJsonPath('classifications.0.opening_balance', '123.45');
         $new = $this->postJson('/api/v1/people', ['name' => 'user created person'])->assertCreated()->json('data');
-        $this->putJson('/api/v1/people/'.$new['id'], ['name' => 'updated person', 'version' => $new['version']])->assertOk()->assertJsonPath('data.name', 'UPDATED PERSON');
+        $this->putJson('/api/v1/people/'.$new['id'], ['name' => 'updated person', 'version' => $new['version']])->assertOk()->assertJsonPath('data.name', 'updated person');
         $marka = $this->postJson('/api/v1/markas', ['code' => 'user-1', 'description' => 'mixed Case'])->assertCreated()->json('data');
         $this->postJson('/api/v1/people/'.$new['id'].'/person-markas', ['marka_id' => $marka['id'], 'status' => true])->assertCreated();
         $this->postJson('/api/v1/people/'.$new['id'].'/contacts', ['address' => 'My address', 'status' => true])->assertCreated();

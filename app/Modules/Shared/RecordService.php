@@ -104,7 +104,7 @@ class RecordService
         return DB::transaction(function () use ($request, $entity, $id, $parent, $definition) {
             DB::table('record_locks')->where('name', 'company_defaults')->lockForUpdate()->first();
             $record = $id ? Access::query($entity, $request->user())->where($parent)->lockForUpdate()->findOrFail($id) : null;
-            $input = UppercaseData::record($entity, $request->all());
+            $input = CanonicalOptions::record($entity, $request->all());
             if ($entity === 'people' && ! empty($input['cnic'])) {
                 $input['cnic'] = preg_replace('/[\s-]+/', '', $input['cnic']);
             }

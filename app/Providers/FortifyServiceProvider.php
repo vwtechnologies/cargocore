@@ -3,7 +3,6 @@
 namespace App\Providers;
 
 use App\Models\User;
-use App\Modules\Shared\UppercaseData;
 use Illuminate\Cache\RateLimiting\Limit;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
@@ -16,7 +15,7 @@ class FortifyServiceProvider extends ServiceProvider
     public function boot(): void
     {
         Fortify::authenticateUsing(function (Request $request): ?User {
-            $user = User::where('username', UppercaseData::text($request->string('username')->toString()))->first();
+            $user = User::whereRaw('LOWER(username) = ?', [mb_strtolower($request->string('username')->toString(), 'UTF-8')])->first();
 
             if (! $user || ! $user->status || ! $user->role?->status || ! Hash::check($request->string('password')->toString(), $user->password)) {
                 return null;

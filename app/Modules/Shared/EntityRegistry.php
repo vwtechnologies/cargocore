@@ -23,7 +23,7 @@ class EntityRegistry
             'account_number' => ['label' => 'Account number', 'max' => 100], 'iban' => ['label' => 'IBAN', 'max' => 34], 'account_title' => ['label' => 'Account title', 'required' => true, 'max' => 255], 'short_title' => ['label' => 'Short title', 'max' => 100],
             'account_holder_name' => ['label' => 'Account holder name', 'max' => 255], 'account_holder_cnic' => ['label' => 'Account holder CNIC / NIC', 'max' => 13],
             'authorized_signatory_name' => ['label' => 'Authorized signatory', 'max' => 255], 'authorized_signatory_cnic' => ['label' => 'Authorized signatory CNIC', 'max' => 13],
-            'account_type' => ['label' => 'Account type', 'type' => 'combobox', 'options' => ['CURRENT', 'SAVINGS', 'FOREIGN CURRENCY', 'OTHER'], 'max' => 50],
+            'account_type' => ['label' => 'Account type', 'type' => 'combobox', 'options' => ['Current', 'Savings', 'Foreign Currency', 'Other'], 'max' => 50],
             'is_cheque' => ['label' => 'Cheque', 'type' => 'boolean', 'default' => false], 'is_beneficiary' => ['label' => 'Beneficiary', 'type' => 'boolean', 'default' => false], 'is_employee' => ['label' => 'Employee', 'type' => 'boolean', 'default' => false],
             'is_company' => ['label' => 'Company', 'type' => 'boolean', 'default' => false], 'is_our_account' => ['label' => 'Our account', 'type' => 'boolean', 'default' => false], 'is_other' => ['label' => 'Other', 'type' => 'boolean', 'default' => false],
             'company_id' => $ref('Legal Account Company', 'companies', false), 'company_address_id' => $ref('Company Address', 'company-addresses', false) + ['depends' => 'company_id'],
@@ -33,7 +33,7 @@ class EntityRegistry
 
         return [
             'companies' => $def('Companies', Models\Company::class, 'companies', 'COM', [
-                'name' => ['label' => 'Company Name', 'required' => true, 'max' => 255], 'short_name' => $short, 'type' => ['label' => 'Type', 'type' => 'combobox', 'options' => ['PRIVATE LIMITED', 'PUBLIC LIMITED', 'PARTNERSHIP', 'SOLE PROPRIETORSHIP', 'OTHER'], 'max' => 80], 'parent_company_id' => $ref('Parent Company', 'companies', false), 'ntn' => ['label' => 'NTN', 'max' => 100], 'strn' => ['label' => 'STRN', 'max' => 100], 'weboc_id' => ['label' => 'WeBOC ID', 'max' => 100], 'psw_id' => ['label' => 'PSW ID', 'max' => 100], 'address' => $address, 'contact_number' => $phone, 'fax_number' => ['label' => 'Fax number', 'max' => 50], 'website' => $website, 'status' => $status, 'is_default' => ['label' => 'Default company', 'type' => 'boolean'],
+                'name' => ['label' => 'Company Name', 'required' => true, 'max' => 255], 'short_name' => $short, 'type' => ['label' => 'Type', 'type' => 'combobox', 'options' => ['Private Limited', 'Public Limited', 'Partnership', 'Sole Proprietorship', 'Other'], 'max' => 80], 'parent_company_id' => $ref('Parent Company', 'companies', false), 'ntn' => ['label' => 'NTN', 'max' => 100], 'strn' => ['label' => 'STRN', 'max' => 100], 'weboc_id' => ['label' => 'WeBOC ID', 'max' => 100], 'psw_id' => ['label' => 'PSW ID', 'max' => 100], 'address' => $address, 'contact_number' => $phone, 'fax_number' => ['label' => 'Fax number', 'max' => 50], 'website' => $website, 'status' => $status, 'is_default' => ['label' => 'Default company', 'type' => 'boolean'],
             ]),
             'company-contacts' => $def('Company Contact Numbers', Models\CompanyContact::class, 'companies', null, [
                 'title' => ['label' => 'Title', 'required' => true, 'max' => 80], 'number' => ['label' => 'Number', 'required' => true, 'max' => 50], 'is_primary' => ['label' => 'Primary', 'type' => 'boolean'], 'status' => $status,
@@ -84,7 +84,7 @@ class EntityRegistry
             ]),
             'people' => $def('People', Models\Person::class, 'people', 'PER', [
                 'name' => ['label' => 'Full name', 'required' => true, 'max' => 255], 'father_husband_name' => ['label' => 'Father / husband name', 'max' => 255],
-                'cnic' => ['label' => 'CNIC', 'max' => 13, 'unique' => true], 'date_of_birth' => ['label' => 'Date of birth', 'type' => 'date'], 'gender' => ['label' => 'Gender', 'type' => 'combobox', 'options' => ['MALE', 'FEMALE', 'OTHER', 'PREFER NOT TO SAY'], 'max' => 50],
+                'cnic' => ['label' => 'CNIC', 'max' => 13, 'unique' => true], 'date_of_birth' => ['label' => 'Date of birth', 'type' => 'date'], 'gender' => ['label' => 'Gender', 'type' => 'combobox', 'options' => ['Male', 'Female', 'Other', 'Prefer Not to Say'], 'max' => 50],
                 'ntn' => ['label' => 'NTN', 'max' => 50], 'strn' => ['label' => 'STRN', 'max' => 50], 'city_id' => $ref('Place (city)', 'cities', false), 'joining_date' => ['label' => 'Joining date', 'type' => 'date'], 'place' => ['label' => 'Place', 'max' => 255], 'comments' => ['label' => 'Comments', 'type' => 'textarea', 'max' => 10000], 'status' => $status, 'is_employee' => ['label' => 'Employee', 'type' => 'boolean', 'default' => false],
             ]),
             'contacts' => $def('Contacts', Models\PersonContact::class, 'people', null, [
